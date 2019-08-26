@@ -9829,12 +9829,22 @@ connect RX and TX</text>
 <wire x1="114.3" y1="55.88" x2="116.84" y2="55.88" width="0.1524" layer="91"/>
 <label x="116.84" y="55.88" size="1.778" layer="95"/>
 </segment>
+<segment>
+<pinref part="U$1" gate="U" pin="PE0"/>
+<wire x1="383.54" y1="83.82" x2="381" y2="83.82" width="0.1524" layer="91"/>
+<label x="381" y="83.82" size="1.778" layer="95" align="center-right"/>
+</segment>
 </net>
 <net name="UART_TX" class="0">
 <segment>
 <pinref part="R8" gate="R" pin="2"/>
 <wire x1="114.3" y1="48.26" x2="116.84" y2="48.26" width="0.1524" layer="91"/>
 <label x="116.84" y="48.26" size="1.778" layer="95"/>
+</segment>
+<segment>
+<pinref part="U$1" gate="U" pin="PE1"/>
+<wire x1="383.54" y1="86.36" x2="381" y2="86.36" width="0.1524" layer="91"/>
+<label x="381" y="86.36" size="1.778" layer="95" align="center-right"/>
 </segment>
 </net>
 <net name="N$19" class="0">

@@ -1984,73 +1984,6 @@ NS Package M08A</description>
 <text x="0" y="4.5" size="1.778" layer="25" font="vector" align="center">&gt;NAME</text>
 <text x="0" y="-4.5" size="1.778" layer="27" font="vector" align="center">&gt;VALUE</text>
 </package>
-<package name="HVQFN-32">
-<smd name="P1" x="-2.565" y="-1.75" dx="0.82" dy="0.27" layer="1"/>
-<smd name="P2" x="-2.565" y="-1.25" dx="0.82" dy="0.27" layer="1"/>
-<smd name="P3" x="-2.565" y="-0.75" dx="0.82" dy="0.27" layer="1"/>
-<smd name="P4" x="-2.565" y="-0.25" dx="0.82" dy="0.27" layer="1"/>
-<smd name="P5" x="-2.565" y="0.25" dx="0.82" dy="0.27" layer="1"/>
-<smd name="P6" x="-2.565" y="0.75" dx="0.82" dy="0.27" layer="1"/>
-<smd name="P7" x="-2.565" y="1.25" dx="0.82" dy="0.27" layer="1"/>
-<smd name="P8" x="-2.565" y="1.75" dx="0.82" dy="0.27" layer="1"/>
-<smd name="P9" x="-1.75" y="2.565" dx="0.27" dy="0.82" layer="1"/>
-<smd name="P10" x="-1.25" y="2.565" dx="0.27" dy="0.82" layer="1"/>
-<smd name="P11" x="-0.75" y="2.565" dx="0.27" dy="0.82" layer="1"/>
-<smd name="P12" x="-0.25" y="2.565" dx="0.27" dy="0.82" layer="1"/>
-<smd name="P13" x="0.25" y="2.565" dx="0.27" dy="0.82" layer="1"/>
-<smd name="P14" x="0.75" y="2.565" dx="0.27" dy="0.82" layer="1"/>
-<smd name="P15" x="1.25" y="2.565" dx="0.27" dy="0.82" layer="1"/>
-<smd name="P16" x="1.75" y="2.565" dx="0.27" dy="0.82" layer="1"/>
-<smd name="P17" x="2.565" y="1.75" dx="0.82" dy="0.27" layer="1"/>
-<smd name="P18" x="2.565" y="1.25" dx="0.82" dy="0.27" layer="1"/>
-<smd name="P19" x="2.565" y="0.75" dx="0.82" dy="0.27" layer="1"/>
-<smd name="P20" x="2.565" y="0.25" dx="0.82" dy="0.27" layer="1"/>
-<smd name="P21" x="2.565" y="-0.25" dx="0.82" dy="0.27" layer="1"/>
-<smd name="P22" x="2.565" y="-0.75" dx="0.82" dy="0.27" layer="1"/>
-<smd name="P23" x="2.565" y="-1.25" dx="0.82" dy="0.27" layer="1"/>
-<smd name="P24" x="2.565" y="-1.75" dx="0.82" dy="0.27" layer="1"/>
-<smd name="P25" x="1.75" y="-2.565" dx="0.27" dy="0.82" layer="1"/>
-<smd name="P26" x="1.25" y="-2.565" dx="0.27" dy="0.82" layer="1"/>
-<smd name="P27" x="0.75" y="-2.565" dx="0.27" dy="0.82" layer="1"/>
-<smd name="P28" x="0.25" y="-2.565" dx="0.27" dy="0.82" layer="1"/>
-<smd name="P29" x="-0.25" y="-2.565" dx="0.27" dy="0.82" layer="1"/>
-<smd name="P30" x="-0.75" y="-2.565" dx="0.27" dy="0.82" layer="1"/>
-<smd name="P31" x="-1.25" y="-2.565" dx="0.27" dy="0.82" layer="1"/>
-<smd name="P32" x="-1.75" y="-2.565" dx="0.27" dy="0.82" layer="1"/>
-<smd name="PD0" x="0" y="0" dx="3.75" dy="3.75" layer="1" cream="no"/>
-<circle x="-1.25" y="1.25" radius="0.3" width="0" layer="31"/>
-<circle x="0" y="1.25" radius="0.3" width="0" layer="31"/>
-<circle x="1.25" y="1.25" radius="0.3" width="0" layer="31"/>
-<circle x="-1.25" y="0" radius="0.3" width="0" layer="31"/>
-<circle x="0" y="0" radius="0.3" width="0" layer="31"/>
-<circle x="1.25" y="0" radius="0.3" width="0" layer="31"/>
-<circle x="-1.25" y="-1.25" radius="0.3" width="0" layer="31"/>
-<circle x="0" y="-1.25" radius="0.3" width="0" layer="31"/>
-<circle x="1.25" y="-1.25" radius="0.3" width="0" layer="31"/>
-<pad name="PD1" x="-0.625" y="0.625" drill="0.3" diameter="0.6"/>
-<pad name="PD2" x="0.625" y="0.625" drill="0.3" diameter="0.6"/>
-<pad name="PD3" x="0.625" y="-0.625" drill="0.3" diameter="0.6"/>
-<pad name="PD4" x="-0.625" y="-0.625" drill="0.3" diameter="0.6"/>
-<wire x1="-3.127" y1="3.127" x2="3.127" y2="3.127" width="0.1524" layer="39"/>
-<wire x1="3.127" y1="3.127" x2="3.127" y2="-3.127" width="0.1524" layer="39"/>
-<wire x1="3.127" y1="-3.127" x2="-3.127" y2="-3.127" width="0.1524" layer="39"/>
-<wire x1="-3.127" y1="-3.127" x2="-3.127" y2="3.127" width="0.1524" layer="39"/>
-<wire x1="-2.5" y1="2.5" x2="2.5" y2="2.5" width="0.1524" layer="51"/>
-<wire x1="2.5" y1="2.5" x2="2.5" y2="-2.5" width="0.1524" layer="51"/>
-<wire x1="2.5" y1="-2.5" x2="-2.5" y2="-2.5" width="0.1524" layer="51"/>
-<wire x1="-2.5" y1="-2.5" x2="-2.5" y2="2.5" width="0.1524" layer="51"/>
-<wire x1="-2.5" y1="2.037" x2="-2.5" y2="2.5" width="0.1524" layer="21"/>
-<wire x1="-2.5" y1="2.5" x2="-2.037" y2="2.5" width="0.1524" layer="21"/>
-<wire x1="2.037" y1="2.5" x2="2.5" y2="2.5" width="0.1524" layer="21"/>
-<wire x1="2.5" y1="2.5" x2="2.5" y2="2.037" width="0.1524" layer="21"/>
-<wire x1="2.5" y1="-2.037" x2="2.5" y2="-2.5" width="0.1524" layer="21"/>
-<wire x1="2.5" y1="-2.5" x2="2.037" y2="-2.5" width="0.1524" layer="21"/>
-<wire x1="-2.037" y1="-2.5" x2="-2.195" y2="-2.5" width="0.1524" layer="21"/>
-<wire x1="-2.195" y1="-2.5" x2="-2.5" y2="-2.195" width="0.1524" layer="21"/>
-<wire x1="-2.5" y1="-2.195" x2="-2.5" y2="-2.037" width="0.1524" layer="21"/>
-<text x="0" y="3.937" size="1.27" layer="25" font="vector" align="center">&gt;NAME</text>
-<text x="0" y="-3.937" size="1.27" layer="27" font="vector" align="center">&gt;VALUE</text>
-</package>
 <package name="SSOP-28">
 <smd name="P1" x="-4.225" y="-3.275" dx="1.25" dy="0.42" layer="1" rot="R90"/>
 <smd name="P2" x="-3.575" y="-3.275" dx="1.25" dy="0.42" layer="1" rot="R90"/>
@@ -2123,6 +2056,43 @@ NS Package M08A</description>
 <rectangle x1="4.015" y1="-3.7" x2="4.435" y2="-2.65" layer="51"/>
 <text x="0" y="5.2" size="1.778" layer="25" font="vector" align="center">&gt;NAME</text>
 <text x="0" y="-5.2" size="1.778" layer="27" font="vector" align="center">&gt;VALUE</text>
+</package>
+<package name="RFIO-RC522">
+<wire x1="-19.5" y1="29.75" x2="19.5" y2="29.75" width="0.3048" layer="21"/>
+<wire x1="19.5" y1="29.75" x2="19.5" y2="-29.75" width="0.3048" layer="21"/>
+<wire x1="19.5" y1="-29.75" x2="-19.5" y2="-29.75" width="0.3048" layer="21"/>
+<wire x1="-19.5" y1="-29.75" x2="-19.5" y2="29.75" width="0.3048" layer="21"/>
+<hole x="-16.75" y="14.25" drill="3"/>
+<hole x="16.75" y="14.25" drill="3"/>
+<hole x="-12.5" y="-22.25" drill="3"/>
+<hole x="12.5" y="-22.25" drill="3"/>
+<wire x1="-18.7" y1="11.45" x2="18.7" y2="11.45" width="0.8128" layer="51"/>
+<wire x1="18.7" y1="11.45" x2="18.7" y2="-28.45" width="0.8128" layer="51"/>
+<wire x1="18.7" y1="-28.45" x2="-18.7" y2="-28.45" width="0.8128" layer="51"/>
+<wire x1="-18.7" y1="-28.45" x2="-18.7" y2="11.45" width="0.8128" layer="51"/>
+<text x="0" y="-22" size="1.27" layer="21" ratio="12" align="center">RFIO-EC522</text>
+<pad name="P1" x="8.89" y="28.25" drill="1.02" diameter="1.632" shape="square"/>
+<pad name="P2" x="6.35" y="28.25" drill="1.02" diameter="1.632"/>
+<pad name="P3" x="3.81" y="28.25" drill="1.02" diameter="1.632"/>
+<pad name="P4" x="1.27" y="28.25" drill="1.02" diameter="1.632"/>
+<pad name="P5" x="-1.27" y="28.25" drill="1.02" diameter="1.632"/>
+<pad name="P6" x="-3.81" y="28.25" drill="1.02" diameter="1.632"/>
+<pad name="P7" x="-6.35" y="28.25" drill="1.02" diameter="1.632"/>
+<pad name="P8" x="-8.89" y="28.25" drill="1.02" diameter="1.632"/>
+<wire x1="-17.2" y1="9.95" x2="17.2" y2="9.95" width="0.8128" layer="51"/>
+<wire x1="17.2" y1="9.95" x2="17.2" y2="-26.95" width="0.8128" layer="51"/>
+<wire x1="17.2" y1="-26.95" x2="-17.2" y2="-26.95" width="0.8128" layer="51"/>
+<wire x1="-17.2" y1="-26.95" x2="-17.2" y2="9.95" width="0.8128" layer="51"/>
+<wire x1="-15.7" y1="8.45" x2="15.7" y2="8.45" width="0.8128" layer="51"/>
+<wire x1="15.7" y1="8.45" x2="15.7" y2="-25.45" width="0.8128" layer="51"/>
+<wire x1="15.7" y1="-25.45" x2="-15.7" y2="-25.45" width="0.8128" layer="51"/>
+<wire x1="-15.7" y1="-25.45" x2="-15.7" y2="8.45" width="0.8128" layer="51"/>
+<wire x1="-19.652" y1="12.402" x2="19.652" y2="12.402" width="0.1524" layer="39"/>
+<wire x1="19.652" y1="12.402" x2="19.652" y2="-29.402" width="0.1524" layer="39"/>
+<wire x1="19.652" y1="-29.402" x2="-19.652" y2="-29.402" width="0.1524" layer="39"/>
+<wire x1="-19.652" y1="-29.402" x2="-19.652" y2="12.402" width="0.1524" layer="39"/>
+<text x="-19.05" y="-31.75" size="1.27" layer="25" font="vector" ratio="12">&gt;NAME</text>
+<text x="-19.05" y="-33.02" size="1.27" layer="27" font="vector" ratio="12">&gt;VALUE</text>
 </package>
 </packages>
 </library>
@@ -2493,10 +2463,6 @@ design rules under a new name.</description>
 <attribute name="NAME" x="-17.78" y="34.98" size="1.778" layer="25" font="vector" align="center"/>
 <attribute name="VALUE" x="-17.78" y="25.98" size="1.778" layer="27" font="vector" align="center"/>
 </element>
-<element name="U2" library="trosh_devices.eagle.v9" package="HVQFN-32" value="MFRC522" x="-58.42" y="29.21" smashed="yes">
-<attribute name="NAME" x="-58.42" y="33.147" size="1.27" layer="25" font="vector" align="center"/>
-<attribute name="VALUE" x="-58.42" y="25.273" size="1.27" layer="27" font="vector" align="center"/>
-</element>
 <element name="U3" library="trosh_devices.eagle.v9" package="SSOP-28" value="PL2303HX" x="-57.15" y="7.62" smashed="yes">
 <attribute name="NAME" x="-57.15" y="12.82" size="1.778" layer="25" font="vector" align="center"/>
 <attribute name="VALUE" x="-57.15" y="2.42" size="1.778" layer="27" font="vector" align="center"/>
@@ -2516,6 +2482,10 @@ design rules under a new name.</description>
 <attribute name="NAME" x="-30.48" y="59.69" size="1.27" layer="25" font="vector" ratio="10"/>
 <attribute name="VALUE" x="-30.48" y="55.88" size="1.27" layer="27" font="vector" ratio="10"/>
 </element>
+<element name="MOD1" library="trosh_devices.eagle.v9" package="RFIO-RC522" value="RFIO-RC522" x="-99.06" y="34.29" smashed="yes">
+<attribute name="NAME" x="-118.11" y="2.54" size="1.27" layer="25" font="vector" ratio="12"/>
+<attribute name="VALUE" x="-118.11" y="1.27" size="1.27" layer="27" font="vector" ratio="12"/>
+</element>
 </elements>
 <signals>
 <signal name="V+">
@@ -2523,38 +2493,6 @@ design rules under a new name.</description>
 </signal>
 <signal name="V-">
 <contactref element="IC2" pad="4"/>
-</signal>
-<signal name="PVDD">
-<contactref element="U2" pad="P2"/>
-</signal>
-<signal name="DVDD">
-<contactref element="U2" pad="P3"/>
-</signal>
-<signal name="DVSS">
-<contactref element="U2" pad="P4"/>
-</signal>
-<signal name="PVSS">
-<contactref element="U2" pad="P5"/>
-</signal>
-<signal name="SVDD">
-<contactref element="U2" pad="P9"/>
-</signal>
-<signal name="TVSS">
-<contactref element="U2" pad="P10"/>
-<contactref element="U2" pad="P14"/>
-<wire x1="-57.67" y1="31.775" x2="-59.67" y2="31.775" width="0" layer="19" extent="1-1"/>
-</signal>
-<signal name="TVDD">
-<contactref element="U2" pad="P12"/>
-</signal>
-<signal name="AVDD">
-<contactref element="U2" pad="P15"/>
-</signal>
-<signal name="VMID">
-<contactref element="U2" pad="P16"/>
-</signal>
-<signal name="AVSS">
-<contactref element="U2" pad="P18"/>
 </signal>
 <signal name="ARDUINO-5">
 <contactref element="J2" pad="6"/>
@@ -2606,6 +2544,7 @@ design rules under a new name.</description>
 <contactref element="C13" pad="2"/>
 <contactref element="C12" pad="2"/>
 <contactref element="C11" pad="2"/>
+<contactref element="MOD1" pad="P6"/>
 <wire x1="-20.32" y1="74.93" x2="-15.24" y2="80.01" width="0" layer="19" extent="1-1"/>
 <wire x1="-24.13" y1="80.01" x2="-20.32" y2="74.93" width="0" layer="19" extent="1-1"/>
 <wire x1="-26.98" y1="81.28" x2="-24.13" y2="80.01" width="0" layer="19" extent="1-1"/>
@@ -2639,6 +2578,7 @@ design rules under a new name.</description>
 <wire x1="-57.475" y1="4.345" x2="-59.425" y2="10.895" width="0" layer="19" extent="1-1"/>
 <wire x1="-43.91" y1="3.68" x2="-54.875" y2="10.895" width="0" layer="19" extent="1-1"/>
 <wire x1="-22.86" y1="3.175" x2="-43.91" y2="3.68" width="0" layer="19" extent="1-1"/>
+<wire x1="-102.87" y1="62.54" x2="-74.93" y2="74.93" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="+5V">
 <contactref element="J4" pad="3"/>
@@ -2733,12 +2673,12 @@ design rules under a new name.</description>
 <signal name="N$1">
 <contactref element="ZD1" pad="C"/>
 <contactref element="R5" pad="2"/>
-<contactref element="J8" pad="8"/>
 <contactref element="IC1" pad="1"/>
 <contactref element="C1" pad="1"/>
-<wire x1="-30.845" y1="58.42" x2="-15.24" y2="74.93" width="0" layer="19" extent="1-1"/>
-<wire x1="-51.22" y1="58.42" x2="-30.845" y2="58.42" width="0" layer="19" extent="1-1"/>
-<wire x1="-54.61" y1="50.8" x2="-51.22" y2="58.42" width="0" layer="19" extent="1-1"/>
+<contactref element="MOD1" pad="P8"/>
+<wire x1="-54.61" y1="50.8" x2="-107.95" y2="62.54" width="0" layer="19" extent="1-1"/>
+<wire x1="-51.22" y1="58.42" x2="-54.61" y2="50.8" width="0" layer="19" extent="1-1"/>
+<wire x1="-30.845" y1="58.42" x2="-51.22" y2="58.42" width="0" layer="19" extent="1-1"/>
 <wire x1="-49.53" y1="25.4" x2="-54.61" y2="50.8" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="N$2">

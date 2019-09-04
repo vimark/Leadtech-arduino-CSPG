@@ -1,0 +1,9 @@
+TO DO:
+make CR2032 battery socket
+
+make circuit for the control relay
+build DC-DC for power supply
+
+buy CD4050
+bring jumper wires
+bring solder iron

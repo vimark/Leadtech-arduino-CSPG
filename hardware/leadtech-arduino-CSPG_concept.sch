@@ -10789,9 +10789,11 @@ DIN A4, landscape with location and doc. field</description>
 <wire x1="3.81" y1="3.81" x2="130.302" y2="3.81" width="0.254" layer="94"/>
 <wire x1="130.302" y1="99.568" x2="3.81" y2="99.568" width="0.254" layer="94"/>
 <text x="347.98" y="7.62" size="3.81" layer="94" ratio="12" align="bottom-center">ARDUINO / ATMEGA1281</text>
-<text x="426.72" y="165.1" size="1.778" layer="94" ratio="12" align="bottom-center">TO DO:
-wire OLED Module
-make CR2032 battery socket</text>
+<text x="426.72" y="165.1" size="1.778" layer="94" ratio="12" align="top-left">TO DO:
+make CR2032 battery socket
+
+make circuit for the control relay
+build DC-DC for power supply</text>
 <text x="231.14" y="104.14" size="3.81" layer="94" ratio="12" align="bottom-center">RFID MODULE</text>
 <wire x1="256.54" y1="99.568" x2="203.962" y2="99.568" width="0.254" layer="94"/>
 <text x="200.66" y="27.94" size="3.81" layer="94" ratio="12" align="bottom-center">5V - 3.3V LEVEL SHIFTER</text>

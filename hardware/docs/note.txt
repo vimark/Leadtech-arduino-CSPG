@@ -7,3 +7,10 @@ build DC-DC for power supply
 buy CD4050
 bring jumper wires
 bring solder iron
+
+Things to order
+1. Soldering Iron with interchangeable tips
+2. Soldering Lead 0.5 mm
+3. Soldering Flux
+3. Soldering Tip cleaning wire mesh
+2. Digital multimeter

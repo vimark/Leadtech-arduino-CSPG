@@ -14,3 +14,13 @@ Things to order
 3. Soldering Flux
 3. Soldering Tip cleaning wire mesh
 2. Digital multimeter
+
+e06d7363h exception dc94a388h
+
+
+DP
+
+width ratio 1.5
+length 0.4 - 0.8 x2, 0.1 pre load
+
+DP10050_V1, PCB_DP_RECTANGLE-50x100

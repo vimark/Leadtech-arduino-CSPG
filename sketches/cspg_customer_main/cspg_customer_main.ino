@@ -68,6 +68,9 @@ U8GLIB_SH1106_128X64 u8g(U8G_I2C_OPT_NONE);
 //            lcd(RS,  E, d4, d5, d6, d7)
 //LiquidCrystal lcd(8,   9,  4,  5,  6,  7);
 
+//buzzer setup
+const int buzzer = 4; //buzzer to arduino pin 4
+
 void setup()
 {
   pinMode(8, OUTPUT);
@@ -171,6 +174,9 @@ Serial << "[SYS][BOOT]RTC Synced";
   screen_now = now() + screen_timeout;
   Serial << "\n[SYS][BOOT] Ready.";
   //Add something below here that reads the CMOS RAM to read the remaining time. Most likely a UNIX timestamp, write to time_t timeLeft.
+
+  //buzzer
+  pinMode(buzzer, OUTPUT); // Set buzzer - pin 4 as an output
 }
 
 void loop()
@@ -220,17 +226,17 @@ void loop()
     wakeScreen();
     handleReadRFID(); // card read handler
   }
-  
 }
 
 void powerOff(){
 active=false;
       Serial << "\n[SYS][OUTPUT] Power deactivated.\n";
+      beep_no_credit();
       digitalWrite(pin_OUTPUT, LOW);
       wakeScreen();
       draw_str("Time Expired.");
       delay(1000);
-      draw_str("Powered OFF");
+      draw_str("Power OFF");
       delay(2000);
 //      wakeScreen();
 }
@@ -299,6 +305,7 @@ void draw_str(unsigned int x, unsigned int y, const char *s) {
 
 //RFID Section and its handlers
 void handleReadRFID() {
+
   draw_str("[RFID]Reading IDCARD...");
   
   byte trailerBlock   = 7;
@@ -339,7 +346,7 @@ void handleReadRFID() {
         Serial.print(F("MIFARE_Read() failed: "));
         Serial.println(mfrc522.GetStatusCodeName(status));
     }
-
+    beep_buzzer();
     //Below code is for verified cards
     String load = dump_byte_array(buffer, 16);
     int load_int = load.toInt();
@@ -606,4 +613,26 @@ void writeBuffer(long timestamp){
   RTC.readRAM(ramBuffer);
   bufferDump("Reading Newly input data");
   
+}
+
+//buzzer stuffs
+
+void beep_buzzer(){
+  tone(buzzer, 1500); // Send 1KHz sound signal...
+  delay(100);        // ...for 0.1 sec
+  noTone(buzzer);     // Stop sound...
+}
+
+void beep_no_credit(){
+  tone(buzzer, 1500); // Send 1KHz sound signal...
+  delay(100);        // ...for 0.1 sec
+  noTone(buzzer);     // Stop sound...
+  delay(100);        // ...for 0.1 sec
+  tone(buzzer, 1500); // Send 1KHz sound signal...
+  delay(100);        // ...for 0.1 sec
+  noTone(buzzer);     // Stop sound...
+  delay(100);        // ...for 0.1 sec
+  tone(buzzer, 1500); // Send 1KHz sound signal...
+  delay(100);        // ...for 0.1 sec
+  noTone(buzzer);     // Stop sound...
 }

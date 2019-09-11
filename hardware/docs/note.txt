@@ -1,26 +1,37 @@
 TO DO:
-make CR2032 battery socket
+*verlyn
+make CR2032 battery socket library
+make LM2596 TO-263 library
 
+*trosh
+Demo
 make circuit for the control relay
+-use this instead https://electronics.stackexchange.com/questions/116271/power-supply-with-lm723
+make circuit for CD4050 buffer
+
+SMD
 build DC-DC for power supply
 
-buy CD4050
 bring jumper wires
-bring solder iron
 
 Things to order
-1. Soldering Iron with interchangeable tips
-2. Soldering Lead 0.5 mm
-3. Soldering Flux
+1. Soldering Iron tips
+2. Soldering Flux
 3. Soldering Tip cleaning wire mesh
-2. Digital multimeter
+4. 2 x Digital multimeter
+5. Extension outlet
+6. USB hub
+7. Desk Lamp
+8. Perfboard
+9. Breadboard
+10. Hook up wires
+11. Buzzer/Beeper
+12. Scissor
+13. Ruler (metal)
+15. Side cutter
+16. long nose pliers
 
-e06d7363h exception dc94a388h
-
-
-DP
-
-width ratio 1.5
-length 0.4 - 0.8 x2, 0.1 pre load
-
-DP10050_V1, PCB_DP_RECTANGLE-50x100
+Soon
+1. Hot air rework station
+2. Stereoscope
+3. Adjustable Power supply

@@ -7,6 +7,7 @@ make LM2596 TO-263 library
 Demo
 make circuit for the control relay
 -use this instead https://electronics.stackexchange.com/questions/116271/power-supply-with-lm723
+thermal printer: https://www.dkia.at/de/node/129
 make circuit for CD4050 buffer
 
 SMD
@@ -30,6 +31,7 @@ Things to order
 13. Ruler (metal)
 15. Side cutter
 16. long nose pliers
+17. Silicon heat mat 1,650
 
 Soon
 1. Hot air rework station

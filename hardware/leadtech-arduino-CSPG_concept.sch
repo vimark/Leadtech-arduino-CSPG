@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="9.4.2">
+<eagle version="9.1.3">
 <drawing>
 <settings>
 <setting alwaysvectorfont="no"/>
@@ -10810,6 +10810,15 @@ which USB connector?</text>
 <wire x1="525.78" y1="89.408" x2="409.702" y2="89.408" width="0.254" layer="94"/>
 <text x="477.52" y="91.44" size="3.81" layer="94" ratio="12" align="bottom-center">OLED DISPLAY</text>
 <text x="480.06" y="27.94" size="3.81" layer="94" ratio="12" align="bottom-center">PIEZO BEEPER</text>
+<text x="358.14" y="55.88" size="1.778" layer="98" align="center">21</text>
+<text x="358.14" y="58.42" size="1.778" layer="98" align="center">20</text>
+<text x="350.52" y="55.88" size="1.778" layer="98" align="center">4</text>
+<text x="359.664" y="114.046" size="1.778" layer="98" align="center">9</text>
+<text x="359.664" y="109.22" size="1.778" layer="98" align="center">12</text>
+<text x="359.664" y="106.68" size="1.778" layer="98" align="center">11</text>
+<text x="359.664" y="104.14" size="1.778" layer="98" align="center">13</text>
+<text x="359.664" y="101.6" size="1.778" layer="98" align="center">10</text>
+<text x="388.62" y="20.32" size="1.778" layer="98" align="center">*GizDuino X 1281 equivalent pins</text>
 </plain>
 <instances>
 <instance part="GND8" gate="G$1" x="142.24" y="7.62" smashed="yes"/>

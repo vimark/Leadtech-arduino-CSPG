@@ -618,13 +618,20 @@ void writeBuffer(long timestamp){
 //buzzer stuffs
 
 void beep_buzzer(){
-  tone(buzzer, 1500); // Send 1KHz sound signal...
+  //for no self oscilling buzzer
+  /*tone(buzzer, 1500); // Send 1KHz sound signal...
   delay(100);        // ...for 0.1 sec
-  noTone(buzzer);     // Stop sound...
+  noTone(buzzer);     // Stop sound...*/
+  //with self oscillating buzzer
+  digitalWrite(buzzer, HIGH);
+  delay(100);        // ...for 0.1 sec
+  digitalWrite(buzzer, LOW);
 }
 
 void beep_no_credit(){
-  tone(buzzer, 1500); // Send 1KHz sound signal...
+
+  //for no self oscilling buzzer
+  /*tone(buzzer, 1500); // Send 1KHz sound signal...
   delay(100);        // ...for 0.1 sec
   noTone(buzzer);     // Stop sound...
   delay(100);        // ...for 0.1 sec
@@ -634,5 +641,18 @@ void beep_no_credit(){
   delay(100);        // ...for 0.1 sec
   tone(buzzer, 1500); // Send 1KHz sound signal...
   delay(100);        // ...for 0.1 sec
-  noTone(buzzer);     // Stop sound...
+  noTone(buzzer);     // Stop sound...*/
+
+  //with self oscillating buzzer
+  digitalWrite(buzzer, HIGH);
+  delay(100);        // ...for 0.1 sec
+  digitalWrite(buzzer, LOW);
+  delay(100);        // ...for 0.1 sec
+  digitalWrite(buzzer, HIGH);
+  delay(100);        // ...for 0.1 sec
+  digitalWrite(buzzer, LOW);
+  delay(100);        // ...for 0.1 sec
+  digitalWrite(buzzer, HIGH);
+  delay(100);        // ...for 0.1 sec
+  digitalWrite(buzzer, LOW);
 }

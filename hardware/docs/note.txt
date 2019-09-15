@@ -8,6 +8,8 @@ Demo
 make circuit for the control relay
 -use this instead https://electronics.stackexchange.com/questions/116271/power-supply-with-lm723
 thermal printer: https://www.dkia.at/de/node/129
+
+https://boxdesigner.connectionlab.org/
 make circuit for CD4050 buffer
 
 SMD

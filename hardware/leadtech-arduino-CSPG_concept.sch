@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="9.1.3">
+<eagle version="9.4.2">
 <drawing>
 <settings>
 <setting alwaysvectorfont="no"/>
@@ -10766,7 +10766,6 @@ DIN A4, landscape with location and doc. field</description>
 <part name="+5V2" library="dp_devices.v6" deviceset="SUPPLY_+5V" device=""/>
 <part name="+5V4" library="dp_devices.v6" deviceset="SUPPLY_+5V" device=""/>
 <part name="SG1" library="buzzer" library_urn="urn:adsk.eagle:library:113" deviceset="F/TMB" device="" package3d_urn="urn:adsk.eagle:package:5260/1"/>
-<part name="R1" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="R-EU_" device="R0603" package3d_urn="urn:adsk.eagle:package:23555/3" value="10K"/>
 <part name="GND2" library="dp_devices.v6" deviceset="SUPPLY_GND" device=""/>
 <part name="MOD2" library="trosh_devices.eagle.v9" deviceset="OLED_I2C_1.3" device=""/>
 <part name="+5V5" library="dp_devices.v6" deviceset="SUPPLY_+5V" device=""/>
@@ -10819,6 +10818,7 @@ which USB connector?</text>
 <text x="359.664" y="104.14" size="1.778" layer="98" align="center">13</text>
 <text x="359.664" y="101.6" size="1.778" layer="98" align="center">10</text>
 <text x="388.62" y="20.32" size="1.778" layer="98" align="center">*GizDuino X 1281 equivalent pins</text>
+<text x="350.52" y="93.98" size="1.778" layer="98" align="center">2</text>
 </plain>
 <instances>
 <instance part="GND8" gate="G$1" x="142.24" y="7.62" smashed="yes"/>
@@ -11028,10 +11028,6 @@ which USB connector?</text>
 <instance part="SG1" gate="1" x="490.22" y="58.42" smashed="yes" rot="R270">
 <attribute name="NAME" x="487.68" y="63.5" size="1.778" layer="95"/>
 <attribute name="VALUE" x="490.22" y="53.34" size="1.778" layer="96" rot="R270"/>
-</instance>
-<instance part="R1" gate="G$1" x="482.6" y="60.96" smashed="yes">
-<attribute name="NAME" x="480.06" y="55.88" size="1.778" layer="95"/>
-<attribute name="VALUE" x="480.06" y="53.34" size="1.778" layer="96"/>
 </instance>
 <instance part="GND2" gate="G$1" x="487.68" y="50.8" smashed="yes"/>
 <instance part="MOD2" gate="MOD" x="477.52" y="119.38" smashed="yes">
@@ -11639,17 +11635,11 @@ which USB connector?</text>
 <label x="337.82" y="96.52" size="1.778" layer="95"/>
 </segment>
 </net>
-<net name="N$1" class="0">
-<segment>
-<pinref part="SG1" gate="1" pin="+"/>
-<pinref part="R1" gate="G$1" pin="2"/>
-</segment>
-</net>
 <net name="PIEZO" class="0">
 <segment>
-<pinref part="R1" gate="G$1" pin="1"/>
-<wire x1="477.52" y1="60.96" x2="474.98" y2="60.96" width="0.1524" layer="91"/>
 <label x="474.98" y="60.96" size="1.778" layer="95" align="center-right"/>
+<pinref part="SG1" gate="1" pin="+"/>
+<wire x1="474.98" y1="60.96" x2="487.68" y2="60.96" width="0.1524" layer="91"/>
 </segment>
 <segment>
 <pinref part="U$1" gate="U" pin="PG5"/>

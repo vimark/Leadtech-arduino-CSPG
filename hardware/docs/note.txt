@@ -39,3 +39,7 @@ Soon
 1. Hot air rework station
 2. Stereoscope
 3. Adjustable Power supply
+
+for PJR
+
+thermal printer A3906SESTR-T QFN-20 step motor driver replacement

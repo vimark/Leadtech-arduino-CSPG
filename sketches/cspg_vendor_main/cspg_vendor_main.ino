@@ -39,7 +39,9 @@ int screen_timeout = 30; // Seconds before screen turns off
 time_t screen_now = now(); // Seconds while action.
 int pin_OUTPUT = 3; // Pin for power output
 //int pin_WAKE = 2; // Pin for Wake
-int pin_WAKE = 45; // Pin for Wake
+int sw1 = 45; // Pin for Wake
+int sw2 = 43; // Pin for Wake
+int sw3 = 41; // Pin for Wake
 boolean active=false;
 boolean screen_sleep = false;
 byte uid[] = {0x54, 0x45, 0x53, 0x54, 0x5f, 0x43, 0x41, 0x52, 0x44, 0x31, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
@@ -77,7 +79,9 @@ void setup()
   pinMode(8, OUTPUT);
   pinMode(pin_OUTPUT, OUTPUT);
   digitalWrite(pin_OUTPUT, LOW);
-  pinMode(pin_WAKE, INPUT_PULLUP);
+  pinMode(sw1, INPUT_PULLUP);
+  pinMode(sw2, INPUT_PULLUP);
+  pinMode(sw3, INPUT_PULLUP);
   Serial.begin(115200);
   Serial.println("[SYS][BOOT]CPSG System");
   Serial.println(BUILD_NUMBER);
@@ -150,7 +154,7 @@ Serial << "[SYS][BOOT]RTC Synced";
     }
   dump_byte_array(key.keyByte, MFRC522::MF_KEY_SIZE);
   initBuffer();
-  if(digitalRead(pin_WAKE)==HIGH){
+  if(digitalRead(sw1)==HIGH){ //vim: I don't get the function for this yet
     RTC.readRAM(ramBuffer);
     bufferDump("Reading CMOS Data...");
     String myString = String((char*)ramBuffer);
@@ -188,7 +192,7 @@ void loop()
     processSyncMessage();
   }
   
-  if(digitalRead(pin_WAKE) == LOW){// wake button handler
+  if(digitalRead(sw1) == LOW){// wake button handler
     Serial.println("[SYS][UI] Wake Pressed");
    wakeScreen();
   }
@@ -232,7 +236,7 @@ void loop()
 void powerOff(){
 active=false;
       Serial << "\n[SYS][OUTPUT] Power deactivated.\n";
-      beep_no_credit();
+      //beep_no_credit(); //silent
       digitalWrite(pin_OUTPUT, LOW);
       wakeScreen();
       draw_str("Time Expired.");
@@ -347,7 +351,7 @@ void handleReadRFID() {
         Serial.print(F("MIFARE_Read() failed: "));
         Serial.println(mfrc522.GetStatusCodeName(status));
     }
-    beep_buzzer();
+    //beep_buzzer(); //silent
     //Below code is for verified cards
     String load = dump_byte_array(buffer, 16);
     int load_int = load.toInt();

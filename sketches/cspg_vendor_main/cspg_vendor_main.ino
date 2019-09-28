@@ -33,7 +33,7 @@ DS1302RTC RTC(5, 6, 7); // RTC Module
 time_t timeLeft = now(); // must be a unix value
 time_t t = now(); // Current time state
 //long time_rate= 259200; // time rate per tap in seconds 
-long time_rate = 20;
+long time_rate = 10;
 int load_rate = 10; // Load to decrease from card
 int screen_timeout = 30; // Seconds before screen turns off
 time_t screen_now = now(); // Seconds while action.
@@ -236,7 +236,7 @@ void loop()
 void powerOff(){
 active=false;
       Serial << "\n[SYS][OUTPUT] Power deactivated.\n";
-      //beep_no_credit(); //silent
+      beep_no_credit(); //silent
       digitalWrite(pin_OUTPUT, LOW);
       wakeScreen();
       draw_str("Time Expired.");
@@ -351,7 +351,7 @@ void handleReadRFID() {
         Serial.print(F("MIFARE_Read() failed: "));
         Serial.println(mfrc522.GetStatusCodeName(status));
     }
-    //beep_buzzer(); //silent
+    beep_buzzer(); //silent
     //Below code is for verified cards
     String load = dump_byte_array(buffer, 16);
     int load_int = load.toInt();

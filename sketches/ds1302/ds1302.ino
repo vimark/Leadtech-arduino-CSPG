@@ -1,3 +1,4 @@
+
 // Timur Maksiomv 2014
 //
 // A quick demo of how to use DS1302-library to make a quick
@@ -38,7 +39,7 @@ void draw(void) {
 }
 
 void draw_str(const char *s) {
-  u8g.firstPage();  
+  u8g.firstPage();
   do {
     u8g.drawStr( 0, 22, s);
   } while( u8g.nextPage() );
@@ -101,7 +102,7 @@ void setup()
 
   // Setup Time library
   draw_str("RTC Sync");
-  setTime(00,21,00,29,9,2019); //hr,min,sec,day,mnth,yr
+  setTime(20,12,00,29,9,2019); //hr,min,sec,day,mnth,yr
   setSyncProvider(RTC.get); // the function to get the time from the RTC
   
   if(timeStatus() == timeSet)

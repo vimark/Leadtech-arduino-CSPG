@@ -33,7 +33,7 @@ DS1302RTC RTC(5, 6, 7); // RTC Module
 time_t timeLeft = now(); // must be a unix value
 time_t t = now(); // Current time state
 //long time_rate= 259200; // time rate per tap in seconds 
-long time_rate = 20;
+long time_rate = 10;
 int load_rate = 10; // Load to decrease from card
 int screen_timeout = 30; // Seconds before screen turns off
 time_t screen_now = now(); // Seconds while action.
@@ -75,7 +75,7 @@ void setup()
 {
   pinMode(8, OUTPUT);
   pinMode(pin_OUTPUT, OUTPUT);
-  digitalWrite(pin_OUTPUT, LOW);
+  digitalWrite(pin_OUTPUT, HIGH);
   pinMode(pin_WAKE, INPUT_PULLUP);
   Serial.begin(115200);
   Serial.println("[SYS][BOOT]CPSG System");
@@ -127,7 +127,7 @@ void setup()
 
   // Setup Time library
 //  draw_str("RTC Sync");
-  setTime(00,52,30,2,6,2019); //hr,min,sec,day,mnth,yr
+  setTime(20,30,00,7,9,2019); //hr,min,sec,day,mnth,yr
   setSyncProvider(RTC.get); // the function to get the time from the RTC
   
   if(timeStatus() == timeSet)
@@ -158,7 +158,7 @@ Serial << "[SYS][BOOT]RTC Synced";
       Serial << "\nResuming Timer Operations";
       timeLeft = myString.toInt();
       active = true;
-      digitalWrite(pin_OUTPUT,HIGH);
+      digitalWrite(pin_OUTPUT,LOW);
     } else{
       Serial << "\nTimer already has expired. Ignoring.";
       active = false;
@@ -232,7 +232,7 @@ void powerOff(){
 active=false;
       Serial << "\n[SYS][OUTPUT] Power deactivated.\n";
       beep_no_credit();
-      digitalWrite(pin_OUTPUT, LOW);
+      digitalWrite(pin_OUTPUT, HIGH);
       wakeScreen();
       draw_str("Time Expired.");
       delay(1000);
@@ -406,7 +406,7 @@ void handleActive() {
   Serial << "\nTime Rate:" << time_rate << "\n";
   if(!active){
     active = true;
-    digitalWrite(pin_OUTPUT,HIGH);
+    digitalWrite(pin_OUTPUT,LOW);
     Serial << "\n[SYS][OUTPUT]Power Active!\n";
     
     timeLeft = now() + time_rate;

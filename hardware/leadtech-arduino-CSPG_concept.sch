@@ -10819,6 +10819,9 @@ which USB connector?</text>
 <text x="359.664" y="101.6" size="1.778" layer="98" align="center">10</text>
 <text x="388.62" y="20.32" size="1.778" layer="98" align="center">*GizDuino X 1281 equivalent pins</text>
 <text x="350.52" y="93.98" size="1.778" layer="98" align="center">2</text>
+<text x="350.52" y="96.52" size="1.778" layer="98" align="center">3</text>
+<text x="304.8" y="93.98" size="1.778" layer="98" align="center">PRINTER TX - 2 (PE4)</text>
+<text x="304.8" y="96.52" size="1.778" layer="98" align="center">PRINTER RX - 3 (PE5)</text>
 </plain>
 <instances>
 <instance part="GND8" gate="G$1" x="142.24" y="7.62" smashed="yes"/>
@@ -11632,7 +11635,7 @@ which USB connector?</text>
 <segment>
 <pinref part="U$1" gate="U" pin="PE5"/>
 <wire x1="340.36" y1="96.52" x2="337.82" y2="96.52" width="0.1524" layer="91"/>
-<label x="337.82" y="96.52" size="1.778" layer="95"/>
+<label x="337.82" y="96.52" size="1.778" layer="95" align="center-right"/>
 </segment>
 </net>
 <net name="PIEZO" class="0">

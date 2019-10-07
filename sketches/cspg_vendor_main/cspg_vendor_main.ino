@@ -19,6 +19,12 @@
 #include <U8glib.h>
 #include <SPI.h>
 #include <MFRC522.h>
+#include "Adafruit_Thermal.h" //printer
+#include "SoftwareSerial.h"   //printer
+
+//printer
+#define TX_PIN 3 // Arduino transmit  YELLOW WIRE  labeled RX on printer
+#define RX_PIN 2 // Arduino receive   GREEN WIRE   labeled TX on printer
 
 #define TIME_HEADER  "T"   // Header tag for serial time sync message
 #define TIME_REQUEST  7    // ASCII bell character requests a time sync message 
@@ -39,9 +45,9 @@ int screen_timeout = 30; // Seconds before screen turns off
 time_t screen_now = now(); // Seconds while action.
 int pin_OUTPUT = 3; // Pin for power output
 //int pin_WAKE = 2; // Pin for Wake
-int sw1 = 45; // Pin for Wake
-int sw2 = 43; // Pin for Wake
-int sw3 = 41; // Pin for Wake
+int sw1 = 45; // Switch 1
+int sw2 = 41; // Switch 2
+int sw3 = 43; // Switch 3
 boolean active=false;
 boolean screen_sleep = false;
 byte uid[] = {0x54, 0x45, 0x53, 0x54, 0x5f, 0x43, 0x41, 0x52, 0x44, 0x31, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
@@ -71,8 +77,14 @@ U8GLIB_SH1106_128X64 u8g(U8G_I2C_OPT_NONE);
 //            lcd(RS,  E, d4, d5, d6, d7)
 //LiquidCrystal lcd(8,   9,  4,  5,  6,  7);
 
+//printer init
+SoftwareSerial mySerial(RX_PIN, TX_PIN); // Declare SoftwareSerial obj first
+Adafruit_Thermal printer(&mySerial);     // Pass addr to printer constructor
+
 //buzzer setup
 const int buzzer = 4; //buzzer to arduino pin 4
+long time = 0;
+long debounce = 350;
 
 void setup()
 {
@@ -182,6 +194,11 @@ Serial << "[SYS][BOOT]RTC Synced";
 
   //buzzer
   pinMode(buzzer, OUTPUT); // Set buzzer - pin 4 as an output
+
+  //printer setup
+  mySerial.begin(19200);  // Initialize SoftwareSerial
+  printer.begin();        // Init printer (same regardless of serial type)
+  printer.sleep();      // Tell printer to sleep
 }
 
 void loop()
@@ -355,12 +372,81 @@ void handleReadRFID() {
     //Below code is for verified cards
     String load = dump_byte_array(buffer, 16);
     int load_int = load.toInt();
+    bool done=1;
+    int load_amount=0;
+    char sBuff[5];
+    char sBuff_bal[5];
+    while(done){
+      
+      draw_loading("Valid Card", "Balance: ", itoa(load_int, sBuff_bal, 10), "Load:", itoa(load_amount, sBuff, 10));
+      if(digitalRead(sw1)==LOW && millis() - time > debounce){
+        load_amount+=10;
+        time = millis(); //debounce, store time
+      }
+      if(digitalRead(sw2)==LOW && millis() - time > debounce){
+        load_amount+=50;
+        time = millis(); //debounce, store time
+      }
+      if(digitalRead(sw3)==LOW && millis() - time > debounce){
+        load_int+=load_amount;
+        String y = (String)load_int;
+        byte tempBuffer[y.length()];
+        for(int m=0;m<y.length();m++){ //copy string to buffer
+          tempBuffer[m] = y[m];
+        }
+        for(int m=0;m<16;m++) // initialize dataBlock array
+          dataBlock[m]=0x00;
+        for(int m=0;m<y.length();m++){ // write to dataBlock array
+          dataBlock[m] =y[m];
+        }
+        status = (MFRC522::StatusCode) mfrc522.MIFARE_Write(blockAddr, dataBlock, 16); // Write to RFID
+        if (status != MFRC522::STATUS_OK) {
+        Serial.print(F("MIFARE_Write() failed: "));
+        Serial.println(mfrc522.GetStatusCodeName(status));
+        draw_str("Card Error.");
+        delay(2000);
+        }else{
+        String temp = "Bal.: ";
+        temp += y;
+        String line2 = "Loaded!";
+        char screenBuffer[20]; 
+        char screenBuffer2[20];
+        temp.toCharArray(screenBuffer2, temp.length()+1);
+        line2.toCharArray(screenBuffer,line2.length()+1);
+        draw_str(screenBuffer2, screenBuffer);
+
+        //print
+        printer.wake();       // MUST wake() before printing again, even if reset
+        printer.feed(2);
+        printer.justify('C');
+        printer.println(F("--------------------------------"));
+        printer.doubleHeightOn();
+        printer.println(F("LEADTECH INC"));
+        printer.doubleHeightOff();
+        printer.println(F("Solar Home Kit Loading Vendor"));
+        printer.feed(1);
+        printer.println(F("Loaded:"));
+        printer.println(itoa(load_amount, sBuff, 10));
+        printer.println(F("This serves as your official"));
+        printer.println(F("receipt"));
+        printer.println(F("Thank You"));
+        printer.println(F("--------------------------------"));
+        printer.feed(2);
+        printer.sleep();      // Tell printer to sleep
+        delay(2000);
+        }
+        done=0;
+      }
+      
+    }
+   /* String load = dump_byte_array(buffer, 16);
+    int load_int = load.toInt();
     if(load_int - load_rate >= 0){
       int x = load_int - load_rate;
       String y = (String)x;
       Serial << "\n[SYS][RFID] Current Load: " << load << "\n";
       Serial << "[SYS][RFID] Remaining Load: " << y << "\n";
-      byte tempBuffer[y.length()];
+      byte tempBuffer[y.length()]; //after load deduction
       for(int m=0;m<y.length();m++){ //copy string to buffer
         tempBuffer[m] = y[m];
       }
@@ -399,7 +485,7 @@ void handleReadRFID() {
       Serial << "\n[SYS][RFID] Insufficient Load \n" << "Load Left: " << load_int << "\n";
       
       delay(1000);
-    }
+    }*/
 
     mfrc522.PICC_HaltA();
     mfrc522.PCD_StopCrypto1();
@@ -628,9 +714,9 @@ void beep_buzzer(){
   delay(100);        // ...for 0.1 sec
   noTone(buzzer);     // Stop sound...*/
   //with self oscillating buzzer
-  digitalWrite(buzzer, HIGH);
+  /*digitalWrite(buzzer, HIGH);
   delay(100);        // ...for 0.1 sec
-  digitalWrite(buzzer, LOW);
+  digitalWrite(buzzer, LOW);*/
 }
 
 void beep_no_credit(){
@@ -649,7 +735,7 @@ void beep_no_credit(){
   noTone(buzzer);     // Stop sound...*/
 
   //with self oscillating buzzer
-  digitalWrite(buzzer, HIGH);
+  /*digitalWrite(buzzer, HIGH);
   delay(100);        // ...for 0.1 sec
   digitalWrite(buzzer, LOW);
   delay(100);        // ...for 0.1 sec
@@ -659,5 +745,16 @@ void beep_no_credit(){
   delay(100);        // ...for 0.1 sec
   digitalWrite(buzzer, HIGH);
   delay(100);        // ...for 0.1 sec
-  digitalWrite(buzzer, LOW);
+  digitalWrite(buzzer, LOW);*/
+}
+
+void draw_loading(const char * strLine1, const char * strLine2, const char * strLine3, const char * strLine4, const char * strLine5) {
+  u8g.firstPage();  
+  do {
+    u8g.drawStr( 0, 22, strLine1);
+    u8g.drawStr( 0, 44, strLine2);
+    u8g.drawStr( 65, 44, strLine3);
+    u8g.drawStr( 0, 62, strLine4);
+    u8g.drawStr( 50, 62, strLine5);
+  } while( u8g.nextPage() );
 }

@@ -27,19 +27,12 @@ Things to order
 2. Soldering Flux
 3. Soldering Tip cleaning wire mesh
 4. 2 x Digital multimeter
-5. Extension outlet
 6. USB hub
-7. Desk Lamp
 8. Perfboard
 9. Breadboard
 10. Hook up wires
-11. Buzzer/Beeper
 12. Scissor
-13. Ruler (metal)
-15. Side cutter
-16. long nose pliers
 17. Silicon heat mat 1,650
-18. Minidrill
 
 Soon
 1. Hot air rework station

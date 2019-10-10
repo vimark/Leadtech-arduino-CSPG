@@ -144,7 +144,7 @@ void setup()
 
   // Setup Time library
 //  draw_str("RTC Sync");
-  setTime(00,52,30,2,6,2019); //hr,min,sec,day,mnth,yr
+  setTime(16,46,30,8,10,2019); //hr,min,sec,day,mnth,yr
   setSyncProvider(RTC.get); // the function to get the time from the RTC
   
   if(timeStatus() == timeSet)

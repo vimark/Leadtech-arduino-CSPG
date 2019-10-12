@@ -10822,6 +10822,9 @@ which USB connector?</text>
 <text x="350.52" y="96.52" size="1.778" layer="98" align="center">3</text>
 <text x="304.8" y="93.98" size="1.778" layer="98" align="center">PRINTER TX - 2 (PE4)</text>
 <text x="304.8" y="96.52" size="1.778" layer="98" align="center">PRINTER RX - 3 (PE5)</text>
+<text x="359.664" y="119.126" size="1.778" layer="98" align="center">7</text>
+<text x="359.664" y="116.586" size="1.778" layer="98" align="center">6</text>
+<text x="350.52" y="91.44" size="1.778" layer="98" align="center">5</text>
 </plain>
 <instances>
 <instance part="GND8" gate="G$1" x="142.24" y="7.62" smashed="yes"/>

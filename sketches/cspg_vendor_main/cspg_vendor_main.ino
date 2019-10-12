@@ -144,6 +144,7 @@ void setup()
 
   // Setup Time library
 //  draw_str("RTC Sync");
+  //There's a bug when month is assigned with a value > 9, Arduino will crash/reset. Kind of overflow state sympthoms somewhere
   setTime(16,46,30,8,10,2019); //hr,min,sec,day,mnth,yr
   setSyncProvider(RTC.get); // the function to get the time from the RTC
   

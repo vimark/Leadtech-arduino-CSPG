@@ -198,6 +198,7 @@ void loop()
     GetTimeInStr(strTime, hour(), minute(), second());
   GetDateInStr(strDate, weekday(), month(), day(), year());
   draw_str(strTime, strDate);
+  //Serial << "\n" << strDate << " " << strTime; //Uncomment to check time via serial
   }else{
     
     if(now()<timeLeft){
@@ -482,46 +483,15 @@ void GetDateInStr(char * vString, int vWeekday, int vMonth, int vDay, int vYear)
   char tStr1[4];
   char tStr2[5];
 
-  switch(vWeekday){
-    case 1: strcpy(tStr1, "Sun");
-    break;
-
-    case 2: strcpy(tStr1, "Mon");
-    break;
-
-    case 3: strcpy(tStr1, "Tue");
-    break;
-
-    case 4: strcpy(tStr1, "Wed");
-    break;
-
-    case 5: strcpy(tStr1, "Thu");
-    break;
-
-    case 6: strcpy(tStr1, "Fri");
-    break;
-
-    case 7: strcpy(tStr1, "Sat");
-    break;
-
-    default:  strcpy(tStr1, "Err");
-  }
-  
-  strcat(tStr1, "-");
-  
-  itoa(vMonth, tStr2, 10);
+  //We're using TimeLib now, use date strings
+    
+  strcpy(tStr1, dayShortStr(vWeekday));
+  strcat(tStr1, " ");
+  strcpy(tStr2, monthShortStr(vMonth));
   strcat(tStr1, tStr2);
-
   strcat(tStr1, "-");
-
   itoa(vDay, tStr2, 10);
   strcat(tStr1, tStr2);
-  
-  strcat(tStr1, "-");
-  
-  itoa(vYear, tStr2, 10);
-  strcat(tStr1, tStr2);
-    
   strcpy(vString, tStr1);
 }
 

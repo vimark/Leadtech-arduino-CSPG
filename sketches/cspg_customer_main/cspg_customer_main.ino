@@ -197,7 +197,7 @@ void loop()
   if(!active){
     GetTimeInStr(strTime, hour(), minute(), second());
   GetDateInStr(strDate, weekday(), month(), day(), year());
-  draw_str(strTime, strDate);
+  draw_str(strTime, dayStr(weekday()), strDate);
   //Serial << "\n" << strDate << " " << strTime; //Uncomment to check time via serial
   }else{
     
@@ -294,6 +294,15 @@ void draw_str(const char * strLine1, const char * strLine2) {
   do {
     u8g.drawStr( 0, 22, strLine1);
     u8g.drawStr( 0, 44, strLine2);
+  } while( u8g.nextPage() );
+}
+
+void draw_str(const char * strLine1, const char * strLine2, const char * strLine3) {
+  u8g.firstPage();  
+  do {
+    u8g.drawStr( 0, 22, strLine1);
+    u8g.drawStr( 0, 38, strLine2);
+    u8g.drawStr( 0, 54, strLine3);
   } while( u8g.nextPage() );
 }
 
@@ -482,15 +491,17 @@ void convertString(char * vString, int vDay){
 void GetDateInStr(char * vString, int vWeekday, int vMonth, int vDay, int vYear){
   char tStr1[4];
   char tStr2[5];
-
+  
   //We're using TimeLib now, use date strings
     
-  strcpy(tStr1, dayShortStr(vWeekday));
-  strcat(tStr1, " ");
-  strcpy(tStr2, monthShortStr(vMonth));
-  strcat(tStr1, tStr2);
+  //strcpy(tStr1, dayShortStr(vWeekday));
+  //strcat(tStr1, " ");
+  strcpy(tStr1, monthShortStr(vMonth));
   strcat(tStr1, "-");
   itoa(vDay, tStr2, 10);
+  strcat(tStr1, tStr2);
+  strcat(tStr1, "-");
+  itoa(vYear, tStr2, 10);
   strcat(tStr1, tStr2);
   strcpy(vString, tStr1);
 }

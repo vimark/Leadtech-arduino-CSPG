@@ -220,7 +220,7 @@ void loop()
   if(!active){
     GetTimeInStr(strTime, hour(), minute(), second());
   GetDateInStr(strDate, weekday(), month(), day(), year());
-  draw_str(strTime, strDate);
+  draw_str(strTime, dayStr(weekday()), strDate);
   }else{
     
     if(now()<timeLeft){
@@ -316,6 +316,15 @@ void draw_str(const char * strLine1, const char * strLine2) {
   do {
     u8g.drawStr( 0, 22, strLine1);
     u8g.drawStr( 0, 44, strLine2);
+  } while( u8g.nextPage() );
+}
+
+void draw_str(const char * strLine1, const char * strLine2, const char * strLine3) {
+  u8g.firstPage();  
+  do {
+    u8g.drawStr( 0, 22, strLine1);
+    u8g.drawStr( 0, 38, strLine2);
+    u8g.drawStr( 0, 54, strLine3);
   } while( u8g.nextPage() );
 }
 
@@ -425,9 +434,14 @@ void handleReadRFID() {
         printer.println(F("LEADTECH INC"));
         printer.doubleHeightOff();
         printer.println(F("Solar Home Kit Loading Vendor"));
+
+        //print timestamp too
+        
         printer.feed(1);
         printer.println(F("Loaded:"));
+        printer.doubleHeightOn();
         printer.println(itoa(load_amount, sBuff, 10));
+        printer.doubleHeightOff();
         printer.println(F("This serves as your official"));
         printer.println(F("receipt"));
         printer.println(F("Thank You"));
@@ -570,50 +584,20 @@ void convertString(char * vString, int vDay){
   strcat(string, " days");
   strcpy(vString, string);
 }
+
 void GetDateInStr(char * vString, int vWeekday, int vMonth, int vDay, int vYear){
   char tStr1[4];
   char tStr2[5];
 
-  switch(vWeekday){
-    case 1: strcpy(tStr1, "Sun");
-    break;
-
-    case 2: strcpy(tStr1, "Mon");
-    break;
-
-    case 3: strcpy(tStr1, "Tue");
-    break;
-
-    case 4: strcpy(tStr1, "Wed");
-    break;
-
-    case 5: strcpy(tStr1, "Thu");
-    break;
-
-    case 6: strcpy(tStr1, "Fri");
-    break;
-
-    case 7: strcpy(tStr1, "Sat");
-    break;
-
-    default:  strcpy(tStr1, "Err");
-  }
-  
-  strcat(tStr1, "-");
-  
-  itoa(vMonth, tStr2, 10);
+  //We're using TimeLib now, use date strings
+    
+  strcpy(tStr1, dayShortStr(vWeekday));
+  strcat(tStr1, " ");
+  strcpy(tStr2, monthShortStr(vMonth));
   strcat(tStr1, tStr2);
-
   strcat(tStr1, "-");
-
   itoa(vDay, tStr2, 10);
   strcat(tStr1, tStr2);
-  
-  strcat(tStr1, "-");
-  
-  itoa(vYear, tStr2, 10);
-  strcat(tStr1, tStr2);
-    
   strcpy(vString, tStr1);
 }
 

@@ -19,6 +19,7 @@
 #include <U8glib.h>
 #include <SPI.h>
 #include <MFRC522.h>
+#include "hardware.h"
 
 #define TIME_HEADER  "T"   // Header tag for serial time sync message
 #define TIME_REQUEST  7    // ASCII bell character requests a time sync message 
@@ -44,9 +45,15 @@ boolean screen_sleep = false;
 byte uid[] = {0x54, 0x45, 0x53, 0x54, 0x5f, 0x43, 0x41, 0x52, 0x44, 0x31, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 char strTime[9]; //Lateral time string variable to display
 char strDate[15]; //Lateral time string variable to display
- char strLine1[9];
- char strLine2[15];
+char strLine1[9];
+char strLine2[15];
 
+//current sense pin and variables
+const int analogPin1 = PIN_SENSE_CURRENT;
+time_t timeCurrentCheckNow;
+int checkCurrentEvery = 5;
+boolean checkingCurrentNow = false;
+int currentValue = 0;
  
 byte sector         = 1;
 byte blockAddr      = 4;
@@ -62,11 +69,6 @@ uint8_t ramBuffer[31]; // RAM Buffer Array for RTC
 //u8glib
 //U8GLIB_SSD1306_128X64 u8g(18, 20, 26, 24);  // SW SPI Com: SCK = 13, MOSI = 11, CS = 10, A0 = 9
 U8GLIB_SH1106_128X64 u8g(U8G_I2C_OPT_NONE);
-
-// Init the LCD
-//   initialize the library with the numbers of the interface pins
-//            lcd(RS,  E, d4, d5, d6, d7)
-//LiquidCrystal lcd(8,   9,  4,  5,  6,  7);
 
 //buzzer setup
 const int buzzer = 4; //buzzer to arduino pin 4
@@ -177,11 +179,15 @@ Serial << "[SYS][BOOT]RTC Synced";
 
   //buzzer
   pinMode(buzzer, OUTPUT); // Set buzzer - pin 4 as an output
+
+  timeCurrentCheckNow = now() + checkCurrentEvery;
+
 }
 
 void loop()
 {
   handleTimeout();
+  handleCurrentCheck();
   if (Serial.available()) { // Time syncer via Serial monitor
     Serial.println("[SYS]Serial Monitor Activity");
     processSyncMessage();
@@ -207,6 +213,16 @@ void loop()
       powerOff();
     }
   }
+
+  //check current every 10 seconds
+  //store time now
+  //check if elapsed time is 5 seconds
+  //if time elapsed is 5 seconds, read current
+  //if current exceeds current limit, tick current flag, wait for 10 seconds 
+  //if in 10 seconds current limit flag is still up, power off output and flash Limit current on screen display
+
+  //Serial << " " << numberOfSeconds(now());
+  if(checkingCurrentNow == true) checkCurrent();
   
   // Warning!
   /*if(timeStatus() != timeSet) {
@@ -636,4 +652,19 @@ void beep_no_credit(){
   digitalWrite(buzzer, HIGH);
   delay(100);        // ...for 0.1 sec
   digitalWrite(buzzer, LOW);
+}
+
+//current check
+void handleCurrentCheck(){
+
+  if(  timeCurrentCheckNow - now() <= 0){
+    Serial << "\n Current value is:" << " " << analogRead(analogPin1);
+    checkingCurrentNow = true;
+  }
+}
+
+void checkCurrent() {
+  
+  checkingCurrentNow = false;
+  timeCurrentCheckNow = now() + checkCurrentEvery;
 }

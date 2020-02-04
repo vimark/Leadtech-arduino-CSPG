@@ -56,11 +56,12 @@ time_t timeCurrentCheckNow;
 int checkCurrentEvery = 5;
 boolean checkingCurrentNow = false;
 int currentValue = 0;
-int currentValue_limit = 700;
+int currentValue_limit = 1500;
 int timeOvercurrent = 0;
-int timeOvercurrentGracePeroid = 15;
+int timeOvercurrentGracePeroid = 6; //this is dependent to checkCurrentEvery, timeOvercurrentGracePeroid x checkCurrentEvery
 boolean overCurrent = false;
-enum fault {overcurrent, other}; //maybe use this for other fault type?
+enum faultType {none, overcurrent, other}; //maybe use this for other fault type?
+faultType fault = none;
 
 //RFID stuff
 byte sector         = 1;
@@ -206,7 +207,11 @@ void loop()
   
   if(digitalRead(pin_WAKE) == LOW){// wake button handler
     Serial.println("[SYS][UI] Wake Pressed");
-   wakeScreen();
+    if(fault==overcurrent){
+      checkRemainingTimeAndPowerUp();
+      fault = none;
+    }
+    else wakeScreen();
   }
   
   
@@ -271,11 +276,11 @@ active=false;
 
 void powerOff_overcurrent(){
 active=false;
-      Serial << "\n[SYS][OUTPUT] Over Current! Power deactivated.\n";
+      Serial << "\n[SYS][OUTPUT] Overload! Power deactivated.\n";
       beep_no_credit();
       digitalWrite(pin_OUTPUT, HIGH);
       wakeScreen();
-      draw_str("Over Current!.");
+      draw_str("Overload!");
       delay(5000);
       draw_str("Power OFF");
       delay(2000);
@@ -704,17 +709,17 @@ void double_beep(){
 void handleCurrentCheck(){
 
   if(  timeCurrentCheckNow - now() <= 0){
-    currentValue = analogRead(analogPin1);
-    Serial << "\n Current value is:" << " " << currentValue;
+    currentValue = map(analogRead(analogPin1), ADC_MIN, ADC_MAX, Vmin, Vmax);
+    Serial << "\n Current value is:" << " " << currentValue <<"mA";
     if(currentValue >= currentValue_limit){
       double_beep();
       if(overCurrent==false){ //mark as overcurrent and start timing it
-        timeOvercurrent = now() + timeOvercurrentGracePeroid;
+        timeOvercurrent = timeOvercurrentGracePeroid;
         overCurrent = true;
       }
       else{
-        timeOvercurrent = timeOvercurrent - now();
-        if(timeOvercurrent <= 0) handleOvercurrent(); //overcurrent timer overflow, declare true overcurrent
+        timeOvercurrent--;
+        if(timeOvercurrent <= 0) handleOvercurrent(); //overcurrent timer overflow, declare overloaded
       }
     }
     else overCurrent = false; //just a surge current, dismiss overcurrent flag
@@ -732,10 +737,17 @@ void checkCurrent() {
 void handleOvercurrent(){
   powerOff_overcurrent();
   overCurrent = false;
+  fault = overcurrent;
+}
+
+void handleOvercurrentWarning(){
+  wakeScreen();
+  draw_str("Time Expired.");
+  delay(1000);
 }
 
 void checkRemainingTimeAndPowerUp(){ //recover from overcurrent shutdown, don't mind the name lol
-   //these snippets are from code starting at line 164, maybe make a function for this?
+   //these snippets are from above code starting at line 164, maybe make a function for this?
     initBuffer();
   
     RTC.readRAM(ramBuffer);

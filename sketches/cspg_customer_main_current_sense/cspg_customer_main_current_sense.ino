@@ -24,6 +24,7 @@
 
 #define TIME_HEADER  "T"   // Header tag for serial time sync message
 #define TIME_REQUEST  7    // ASCII bell character requests a time sync message 
+#define GMT_plus_8 28800 // +8hrs value in seconds added
 
 MFRC522::MIFARE_Key key;
 constexpr uint8_t RST_PIN = 9;          // Configurable, see typical pin layout above
@@ -562,9 +563,9 @@ void processSyncMessage() {
      if( pctime >= DEFAULT_TIME) { // check the integer is a valid time (greater than Jan 1 2013)
        
        
-       if(RTC.set(pctime) == 0){
+       if(RTC.set(pctime + GMT_plus_8) == 0){
         setTime(RTC.get()); // Sync Arduino clock to the time received on the serial port
-        Serial.println("[SYS][CLOCK] Time Set."); 
+        Serial.println("[SYS][CLOCK] Time Set.");
        }
        else{
         Serial << "\n[SYS][WARN]RTC was not set!";

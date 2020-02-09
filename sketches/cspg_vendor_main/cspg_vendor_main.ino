@@ -21,13 +21,11 @@
 #include <MFRC522.h>
 #include "Adafruit_Thermal.h" //printer
 #include "SoftwareSerial.h"   //printer
-
-//printer
-#define TX_PIN 3 // Arduino transmit  YELLOW WIRE  labeled RX on printer
-#define RX_PIN 2 // Arduino receive   GREEN WIRE   labeled TX on printer
+#include "hardware.h"
 
 #define TIME_HEADER  "T"   // Header tag for serial time sync message
-#define TIME_REQUEST  7    // ASCII bell character requests a time sync message 
+#define TIME_REQUEST  7    // ASCII bell character requests a time sync message
+#define GMT_plus_8 28800 // +8hrs value in seconds added
 
 MFRC522::MIFARE_Key key;
 constexpr uint8_t RST_PIN = 9;          // Configurable, see typical pin layout above
@@ -35,7 +33,7 @@ constexpr uint8_t SS_PIN = 10;         // Configurable, see typical pin layout a
 MFRC522 mfrc522(SS_PIN, RST_PIN);  // Create MFRC522 instance
 // Init the DS1302
 // Set pins:  CE, IO,CLK
-DS1302RTC RTC(5, 6, 7); // RTC Module
+DS1302RTC RTC(5, 6, 7); // RTC Module ENABLE, DATA, CLOCK
 time_t timeLeft = now(); // must be a unix value
 time_t t = now(); // Current time state
 //long time_rate= 259200; // time rate per tap in seconds 
@@ -53,8 +51,8 @@ boolean screen_sleep = false;
 byte uid[] = {0x54, 0x45, 0x53, 0x54, 0x5f, 0x43, 0x41, 0x52, 0x44, 0x31, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 char strTime[9]; //Lateral time string variable to display
 char strDate[15]; //Lateral time string variable to display
- char strLine1[9];
- char strLine2[15];
+char strLine1[9];
+char strLine2[15];
 
  
 byte sector         = 1;
@@ -157,6 +155,7 @@ Serial << "[SYS][BOOT]RTC Synced";
 
 //  delay ( 1000 );
 
+  Serial << "\n RFID reader info... \n";
   SPI.begin();      // Init SPI bus
   mfrc522.PCD_Init();   // Init MFRC522
   mfrc522.PCD_DumpVersionToSerial();  // Show details of PCD - MFRC522 Card Reader details
@@ -167,6 +166,7 @@ Serial << "[SYS][BOOT]RTC Synced";
     }
   dump_byte_array(key.keyByte, MFRC522::MF_KEY_SIZE);
   initBuffer();
+  Serial << "\n";
   if(digitalRead(sw1)==HIGH){ //vim: I don't get the function for this yet
     RTC.readRAM(ramBuffer);
     bufferDump("Reading CMOS Data...");
@@ -341,9 +341,9 @@ void handleReadRFID() {
   draw_str("[RFID]Reading IDCARD...");
   
   byte trailerBlock   = 7;
-    MFRC522::StatusCode status;
-    byte buffer[18];
-    byte size = sizeof(buffer);
+  MFRC522::StatusCode status;
+  byte buffer[18];
+  byte size = sizeof(buffer);
     
   status = (MFRC522::StatusCode) mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, trailerBlock, &key, &(mfrc522.uid));
     if (status != MFRC522::STATUS_OK) {
@@ -353,7 +353,8 @@ void handleReadRFID() {
         return;
     }
     Serial << "\n[SYS][RFID] Reading Auth Data\n";
-     status = (MFRC522::StatusCode) mfrc522.MIFARE_Read(5, buffer, &size);
+
+    status = (MFRC522::StatusCode) mfrc522.MIFARE_Read(5, buffer, &size);
     if (status != MFRC522::STATUS_OK) {
         draw_str("RFID Data Error");
         Serial.print(F("MIFARE_Read() failed: "));
@@ -371,6 +372,15 @@ void handleReadRFID() {
         return;
       }
     }
+    //meter number identity @ block 6, format is "CSPG001"
+    status = (MFRC522::StatusCode) mfrc522.MIFARE_Read(6, buffer, &size);
+    if (status != MFRC522::STATUS_OK) {
+        draw_str("RFID Data Error");
+        Serial.print(F("MIFARE_Read() failed: "));
+        Serial.println(mfrc522.GetStatusCodeName(status));
+    }
+    String meter_name = dump_byte_array(buffer, 16);
+    Serial << "\n" <<meter_name <<"\n";
     
     status = (MFRC522::StatusCode) mfrc522.MIFARE_Read(blockAddr, buffer, &size);
     if (status != MFRC522::STATUS_OK) {
@@ -378,6 +388,20 @@ void handleReadRFID() {
         Serial.print(F("MIFARE_Read() failed: "));
         Serial.println(mfrc522.GetStatusCodeName(status));
     }
+
+    /*status = (MFRC522::StatusCode) mfrc522.MIFARE_Read(0, buffer, &size);
+    if (status != MFRC522::STATUS_OK) {
+        draw_str("RFID Data Error");
+        Serial.print(F("MIFARE_Read() failed: "));
+        Serial.println(mfrc522.GetStatusCodeName(status));
+        delay(100);
+        mfrc522.PICC_HaltA();
+        mfrc522.PCD_StopCrypto1();
+        return;
+    }
+    String load_auth1 = dump_byte_array(buffer, 16);
+    Serial << "\n" <<load_auth1 <<"\n";*/
+    
     beep_buzzer(); //silent
     //Below code is for verified cards
     String load = dump_byte_array(buffer, 16);
@@ -409,6 +433,19 @@ void handleReadRFID() {
         for(int m=0;m<y.length();m++){ // write to dataBlock array
           dataBlock[m] =y[m];
         }
+        //temporary code only, for writing something on specific block
+        /*byte valuetowrite[]    = {
+          'C', 'S', 'P', 'G', ' ', 'M', 'E', 'T', 'E', 'R', ' ', '0', '0', '0', '1', 0x00
+        };
+        status = (MFRC522::StatusCode) mfrc522.MIFARE_Write(6, valuetowrite, 16);
+        if (status != MFRC522::STATUS_OK) {
+        Serial.print(F("MIFARE_Write() failed: "));
+        Serial.println(mfrc522.GetStatusCodeName(status));
+        draw_str("Card Error.");
+        delay(2000);
+        }*/
+        //temporary code only, up to here
+        
         status = (MFRC522::StatusCode) mfrc522.MIFARE_Write(blockAddr, dataBlock, 16); // Write to RFID
         if (status != MFRC522::STATUS_OK) {
         Serial.print(F("MIFARE_Write() failed: "));
@@ -612,7 +649,7 @@ void processSyncMessage() {
      if( pctime >= DEFAULT_TIME) { // check the integer is a valid time (greater than Jan 1 2013)
        
        
-       if(RTC.set(pctime) == 0){
+       if(RTC.set(pctime + GMT_plus_8) == 0){
         setTime(RTC.get()); // Sync Arduino clock to the time received on the serial port
         Serial.println("[SYS][CLOCK] Time Set."); 
        }

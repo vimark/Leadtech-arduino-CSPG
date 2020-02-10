@@ -1,5 +1,3 @@
-#include <Streaming.h> // Easy Serial out
-
 #define VERSION "v0.004b" // Software Version
 #define DEV_MESSAGE "Roland Kim Andre Solon"
 #define BUILD_NUMBER "Build 0001 06/20/19"
@@ -21,16 +19,23 @@
 #include <SPI.h>
 #include <MFRC522.h>
 #include "hardware.h"
+#include <Streaming.h> // Easy Serial out
+#include <SerialCommand.h> //Using serialcommand by Steven Cogswell https://github.com/scogswell/ArduinoSerialCommand
 
-#define TIME_HEADER  "T"   // Header tag for serial time sync message
 #define TIME_REQUEST  7    // ASCII bell character requests a time sync message 
 #define GMT_plus_8 28800 // +8hrs value in seconds added
 
+//debug
+#define DISPLAY_CURRENT_VALUE 0
+
 //RTC RAM locations, partitions
 #define RTC_RAM_END 31
+#define LEN_TIME_RATE 8
+#define LEN_TIME_STAMP 10
+#define LOC_TIME_STAMP 0
+#define LOC_TIME_RATE LOC_TIME_STAMP+LEN_TIME_STAMP+1 //additional +1 since a null character is inserted, waste of space!
 
-//commands
-#define ADMIN_SET_TIME_RATE "CSPG_set_time_rate" //change load rate
+SerialCommand SCmd; //serial command instance
 
 MFRC522::MIFARE_Key key;
 constexpr uint8_t RST_PIN = 9;          // Configurable, see typical pin layout above
@@ -48,7 +53,8 @@ int load_rate = 10; // Load to decrease from card
 int screen_timeout = 30; // Seconds before screen turns off
 time_t screen_now = now(); // Seconds while action.
 int pin_OUTPUT = 3; // Pin for power output
-int pin_WAKE = 2; // Pin for Wake
+//int pin_WAKE = 2; // Pin for Wake
+int pin_WAKE = 45; // Pin for Wake, temporary only
 boolean active=false;
 boolean screen_sleep = false;
 byte uid[] = {0x54, 0x45, 0x53, 0x54, 0x5f, 0x43, 0x41, 0x52, 0x44, 0x31, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
@@ -206,6 +212,11 @@ Serial << "[SYS][BOOT]RTC Synced";
 
   timeCurrentCheckNow = now() + checkCurrentEvery;
 
+  //serial commands
+  SCmd.addCommand("DUMP", CMD_dump_cmos);
+  SCmd.addCommand("SETRATE", CMD_set_rate);
+  SCmd.addCommand("TIME", CMD_set_time);
+  SCmd.addCommand("TEST", CMD_test_function);
 }
 
 void loop()
@@ -213,14 +224,7 @@ void loop()
   handleTimeout();
   handleCurrentCheck();
 
-  if(Serial.available()){
-    handleAdminAccess();
-  }
-  
-  if (Serial.available()) { // Time syncer via Serial monitor
-    Serial.println("[SYS]Serial Monitor Activity");
-    processSyncMessage();
-  }
+  SCmd.readSerial(); //serial command handler
   
   if(digitalRead(pin_WAKE) == LOW){// wake button handler
     Serial.println("[SYS][UI] Wake Pressed");
@@ -234,15 +238,17 @@ void loop()
   
   // Current Time Handler
   if(!active){
+    
     GetTimeInStr(strTime, hour(), minute(), second());
-  GetDateInStr(strDate, weekday(), month(), day(), year());
-  draw_str(strTime, dayStr(weekday()), strDate);
-  //Serial << "\n" << strDate << " " << strTime; //Uncomment to check time via serial
-  }else{
+    GetDateInStr(strDate, weekday(), month(), day(), year());
+    draw_str(strTime, dayStr(weekday()), strDate);
+  }
+  else{
     
     if(now()<timeLeft){
-    drawTime();
-    }else if(now()>timeLeft){
+      drawTime();
+    }
+    else if(now()>timeLeft){
       powerOff();
     }
   }
@@ -254,7 +260,6 @@ void loop()
   //if current exceeds current limit, tick current flag, wait for 10 seconds 
   //if in 10 seconds current limit flag is still up, power off output and flash Limit current on screen display
 
-  //Serial << " " << numberOfSeconds(now());
   if(checkingCurrentNow == true) checkCurrent();
   
   // Warning!
@@ -573,6 +578,7 @@ void convertString(char * vString, int vDay){
   strcat(string, " days");
   strcpy(vString, string);
 }
+
 void GetDateInStr(char * vString, int vWeekday, int vMonth, int vDay, int vYear){
   char tStr1[4];
   char tStr2[5];
@@ -589,42 +595,6 @@ void GetDateInStr(char * vString, int vWeekday, int vMonth, int vDay, int vYear)
   itoa(vYear, tStr2, 10);
   strcat(tStr1, tStr2);
   strcpy(vString, tStr1);
-}
-
-//Process Time via Serial Monitor function
-//Should add a verifier for this to avoid cheating.
-void processSyncMessage() {
-  unsigned long pctime;
-  const unsigned long DEFAULT_TIME = 1357041600; // Jan 1 2013
-
-  if(Serial.find(TIME_HEADER)) {
-     pctime = Serial.parseInt();
-     if( pctime >= DEFAULT_TIME) { // check the integer is a valid time (greater than Jan 1 2013)
-       
-       
-       if(RTC.set(pctime + GMT_plus_8) == 0){
-        setTime(RTC.get()); // Sync Arduino clock to the time received on the serial port
-        Serial.println("[SYS][CLOCK] Time Set.");
-       }
-       else{
-        Serial << "\n[SYS][WARN]RTC was not set!";
-       }
-       
-     }else{
-      Serial.println("[SYS][CLOCK] Time input was rejected.");
-     }
-  }
-}
-
-void handleAdminAccess(){
-  long lBuffer;
-  
-  if(Serial.find(ADMIN_SET_TIME_RATE)) {
-    lBuffer = Serial.parseInt();
-    time_rate = lBuffer;
-    Serial.println("Time rate changed to:");
-    Serial.println(time_rate, DEC);
-  }
 }
 
 time_t requestSync()
@@ -656,7 +626,7 @@ void bufferDump(const char *msg)
   Serial.println(msg);
   for (int i=0; i<31; i++)
   {
-    Serial.print("0x");
+    //Serial.print("0x");
     if(ramBuffer[i] <= 0xF) Serial.print("0");
     Serial.print(ramBuffer[i], HEX);
     Serial.print(" ");
@@ -692,24 +662,38 @@ void writeBuffer(long timestamp){
   
 }
 
-void writeToRtcRam(long timestamp, ramData vData){
+//names are confusing, try to fix these
+//CMOS refers to RTC RAM!
+void writeToRtcRam(long vTime, ramData vData){
   String temp1;
-  temp1 += timestamp;
+  temp1 += vTime;
   byte buff[RTC_RAM_END];
   
   if(vData==TIME_END){
-    for(int i=0;i<temp1.length();i++){
-    buff[i] = (int) temp1[i];
-    }
+
+    initBuffer();
+    RTC.readRAM(ramBuffer); //get CMOS contents
+    
+    //for(int i=0; i<=LEN_TIME_STAMP; i++) ramBuffer[i] = 0; //clear time out partition
+    for(int i=0; i<=LEN_TIME_STAMP; i++) ramBuffer[i] = (int) temp1[i];
+    
+    RTC.writeEN(true);
+    RTC.writeRAM(ramBuffer);
+    RTC.writeEN(false);
     initBuffer();
     RTC.readRAM(ramBuffer);
-  
-    //copy the content of saved time rate from RAM to buff
-    for(int i=RTC_RAM_END-sizeof(ramTimeRate); i<RTC_RAM_END; i++){
-      buff[i]=ramBuffer[i];
-    }
+    bufferDump("Reading Newly input data");
+  }
+  if(vData==TIME_RATE){
+
+    initBuffer();
+    RTC.readRAM(ramBuffer); //get CMOS contents
+    
+    for(int i=LOC_TIME_RATE; i<=LEN_TIME_RATE; i++) ramBuffer[i] = 0; //clear time rate partition
+    for(int i=0; i<=LEN_TIME_RATE; i++) ramBuffer[i+LOC_TIME_RATE] = (int) temp1[i]; //copy contents to partition
+    
     RTC.writeEN(true);
-    RTC.writeRAM(buff);
+    RTC.writeRAM(ramBuffer);
     RTC.writeEN(false);
     initBuffer();
     RTC.readRAM(ramBuffer);
@@ -786,7 +770,7 @@ void handleCurrentCheck(){
 
   if(  timeCurrentCheckNow - now() <= 0){
     currentValue = map(analogRead(analogPin1), ADC_MIN, ADC_MAX, Vmin, Vmax);
-    Serial << "\n Current value is:" << " " << currentValue <<"mA";
+    if(DISPLAY_CURRENT_VALUE) Serial << "\n Current value is:" << " " << currentValue <<"mA";
     if(currentValue >= currentValue_limit){
       double_beep();
       if(overCurrent==false){ //mark as overcurrent and start timing it
@@ -839,5 +823,88 @@ void checkRemainingTimeAndPowerUp(){ //recover from overcurrent shutdown, don't 
       Serial << "\nTimer already has expired. Ignoring.";
       active = false;
     }
+  
+}
+
+//serial commands
+void CMD_dump_cmos(){
+
+  Serial.println();
+  RTC.readRAM(ramBuffer);
+  bufferDump("Dumping RTC RAM"); 
+}
+
+void CMD_set_rate(){
+
+  char *arg;
+  long lBuffer;
+
+  arg = SCmd.next();
+  if(arg != NULL){
+    lBuffer = atol(arg); //convert string to long int
+    time_rate = lBuffer;
+    Serial.print("\nTime rate changed to: ");
+    Serial.println(lBuffer);
+
+    Serial.print("\nSaving new time rate to CMOS");
+    writeToRtcRam(time_rate, TIME_RATE);
+  }
+}
+
+void CMD_set_time(){
+
+  char *arg;
+  unsigned long pctime;
+  const unsigned long DEFAULT_TIME = 1357041600; // Jan 1 2013
+
+  arg = SCmd.next();
+  pctime = atol(arg);
+  if(arg != NULL){
+    if( pctime >= DEFAULT_TIME){ // check the integer is a valid time (greater than Jan 1 2013)
+      
+      if(RTC.set(pctime + GMT_plus_8) == 0){
+        setTime(RTC.get()); // Sync Arduino clock to the time received on the serial port
+        Serial.println("[SYS][CLOCK] Time Set.");
+      }
+      else{
+        Serial << "\n[SYS][WARN]RTC was not set!";
+      }
+      
+    }
+    else{
+      Serial.println("[SYS][CLOCK] Time input was rejected.");
+    }
+  }
+  else{
+    
+    GetDateInStr(strDate, weekday(), month(), day(), year());
+    GetTimeInStr(strTime, hour(), minute(), second());
+    Serial.print("\n");
+    Serial.print("System time is: ");
+    Serial.print(dayStr(weekday()));
+    Serial.print(" ");
+    Serial.print(strDate);
+    Serial.print(" ");
+    Serial.print(strTime);
+  }  
+}
+
+void CMD_test_function(){
+
+  byte buff[RTC_RAM_END];
+  
+  Serial.print("\n Time rate is: ");
+  Serial.println(time_rate);
+
+  Serial.print("\n");
+  for (int i=0; i<RTC_RAM_END; i++)
+  {
+    if(buff[i] <= 0xF) Serial.print("0");
+    Serial.print(buff[i], HEX);
+    Serial.print(" ");
+    if(!((i+1) % 8)) Serial.println();
+  }
+  Serial.println();
+  Serial.println("--------------------------------------------------------");
   
 }

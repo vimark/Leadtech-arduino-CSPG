@@ -40,6 +40,8 @@ MFRC522::MIFARE_Key key;
 byte cspg_uid[] = {0x54, 0x45, 0x53, 0x54, 0x5f, 0x43, 0x41, 0x52, 0x44, 0x31, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}; //UID of CARD to be identified as CSPG legit cards
 //address of UID is at block 5 sector 1
 
+byte meter_identity[]    = {'C', 'S', 'P', 'G', ' ', 'M', 'E', 'T', 'E', 'R', ' ', '0', '0', '0', 'X', 0x00 };
+
 /**
  * Initialize.
  */
@@ -152,6 +154,19 @@ void loop() {
     }
     Serial.println();
 
+    // Write data to the block, meter identity
+    blockAddr = 6;
+    Serial.print(F("Writing data into block ")); Serial.print(blockAddr);
+    Serial.println(F(" ..."));
+    dump_byte_array(meter_identity, 16); Serial.println();
+    status = (MFRC522::StatusCode) mfrc522.MIFARE_Write(blockAddr, meter_identity, 16);
+    if (status != MFRC522::STATUS_OK) {
+        Serial.print(F("MIFARE_Write() failed: "));
+        Serial.println(mfrc522.GetStatusCodeName(status));
+    }
+    Serial.println();
+    
+    blockAddr = 5;
     // Read data from the block (again, should now be what we have written)
     Serial.print(F("Reading data from block ")); Serial.print(blockAddr);
     Serial.println(F(" ..."));
@@ -170,6 +185,36 @@ void loop() {
     for (byte i = 0; i < 16; i++) {
         // Compare buffer (= what we've read) with dataBlock (= what we've written)
         if (buffer[i] == cspg_uid[i])
+            count++;
+    }
+    Serial.print(F("Number of bytes that match = ")); Serial.println(count);
+    if (count == 16) {
+        Serial.println(F("Success :-)"));
+    } else {
+        Serial.println(F("Failure, no match :-("));
+        Serial.println(F("  perhaps the write didn't work properly..."));
+    }
+    Serial.println();
+    
+    blockAddr = 6;
+    // Read data from the block (again, should now be what we have written)
+    Serial.print(F("Reading data from block ")); Serial.print(blockAddr);
+    Serial.println(F(" ..."));
+    status = (MFRC522::StatusCode) mfrc522.MIFARE_Read(blockAddr, buffer, &size);
+    if (status != MFRC522::STATUS_OK) {
+        Serial.print(F("MIFARE_Read() failed: "));
+        Serial.println(mfrc522.GetStatusCodeName(status));
+    }
+    Serial.print(F("Data in block ")); Serial.print(blockAddr); Serial.println(F(":"));
+    dump_byte_array(buffer, 16); Serial.println();
+
+    // Check that data in block is what we have written
+    // by counting the number of bytes that are equal
+    Serial.println(F("Checking result..."));
+    count = 0;
+    for (byte i = 0; i < 16; i++) {
+        // Compare buffer (= what we've read) with dataBlock (= what we've written)
+        if (buffer[i] == meter_identity[i])
             count++;
     }
     Serial.print(F("Number of bytes that match = ")); Serial.println(count);

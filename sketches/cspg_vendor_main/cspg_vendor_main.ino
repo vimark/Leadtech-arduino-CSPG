@@ -27,6 +27,10 @@
 #define TIME_REQUEST  7    // ASCII bell character requests a time sync message
 #define GMT_plus_8 28800 // +8hrs value in seconds added
 
+//DEBUG Switches
+#define ENABLE_PRINTING true
+#define ENABLE_BUZZER true
+
 MFRC522::MIFARE_Key key;
 constexpr uint8_t RST_PIN = 9;          // Configurable, see typical pin layout above
 constexpr uint8_t SS_PIN = 10;         // Configurable, see typical pin layout above
@@ -54,7 +58,6 @@ char strDate[15]; //Lateral time string variable to display
 char strLine1[9];
 char strLine2[15];
 
- 
 byte sector         = 1;
 byte blockAddr      = 4;
 byte dataBlock[]    = {  // Initial DataBlock array
@@ -63,6 +66,11 @@ byte dataBlock[]    = {  // Initial DataBlock array
   0x00, 0x00, 0x00, 0x00, 
   0x00, 0x00, 0x00, 0x00  
 };
+
+//printer
+boolean printing = false;
+int print_amount;
+time_t print_timestamp;
 
 uint8_t ramBuffer[31]; // RAM Buffer Array for RTC
 
@@ -249,12 +257,19 @@ void loop()
     wakeScreen();
     handleReadRFID(); // card read handler
   }
+
+  //print
+  if(printing){
+    //say printing on screen
+    handlePrinter(print_amount, print_timestamp);
+    printing=false;
+  }
 }
 
 void powerOff(){
 active=false;
       Serial << "\n[SYS][OUTPUT] Power deactivated.\n";
-      beep_no_credit(); //silent
+      if(ENABLE_BUZZER) beep_no_credit();
       digitalWrite(pin_OUTPUT, LOW);
       wakeScreen();
       draw_str("Time Expired.");
@@ -359,6 +374,10 @@ void handleReadRFID() {
         draw_str("RFID Data Error");
         Serial.print(F("MIFARE_Read() failed: "));
         Serial.println(mfrc522.GetStatusCodeName(status));
+        mfrc522.PICC_HaltA();
+        mfrc522.PCD_StopCrypto1();
+        delay(2000);
+        return;
     }
     String load_auth = dump_byte_array(buffer, 16);
     Serial << "\n" <<load_auth <<"\n";
@@ -378,6 +397,10 @@ void handleReadRFID() {
         draw_str("RFID Data Error");
         Serial.print(F("MIFARE_Read() failed: "));
         Serial.println(mfrc522.GetStatusCodeName(status));
+        mfrc522.PICC_HaltA();
+        mfrc522.PCD_StopCrypto1();
+        delay(2000);
+        return;
     }
     String meter_name = dump_byte_array(buffer, 16);
     Serial << "\n" <<meter_name <<"\n";
@@ -387,6 +410,10 @@ void handleReadRFID() {
         draw_str("RFID Data Error");
         Serial.print(F("MIFARE_Read() failed: "));
         Serial.println(mfrc522.GetStatusCodeName(status));
+        mfrc522.PICC_HaltA();
+        mfrc522.PCD_StopCrypto1();
+        delay(2000);
+        return;
     }
 
     /*status = (MFRC522::StatusCode) mfrc522.MIFARE_Read(0, buffer, &size);
@@ -402,7 +429,7 @@ void handleReadRFID() {
     String load_auth1 = dump_byte_array(buffer, 16);
     Serial << "\n" <<load_auth1 <<"\n";*/
     
-    beep_buzzer(); //silent
+    if(ENABLE_BUZZER) beep_buzzer();
     //Below code is for verified cards
     String load = dump_byte_array(buffer, 16);
     int load_int = load.toInt();
@@ -414,14 +441,15 @@ void handleReadRFID() {
       
       draw_loading("Valid Card", "Balance: ", itoa(load_int, sBuff_bal, 10), "Load:", itoa(load_amount, sBuff, 10));
       if(digitalRead(sw1)==LOW && millis() - time > debounce){
-        load_amount+=10;
+        load_amount+=15;
         time = millis(); //debounce, store time
       }
-      if(digitalRead(sw2)==LOW && millis() - time > debounce){
-        load_amount+=50;
+      if(digitalRead(sw2)==LOW && millis() - time > debounce){ //cancel button
         time = millis(); //debounce, store time
+        done=0;
       }
-      if(digitalRead(sw3)==LOW && millis() - time > debounce){
+      if(digitalRead(sw3)==LOW && millis() - time > debounce){ //load button
+        time = millis(); //debounce, store time
         load_int+=load_amount;
         String y = (String)load_int;
         byte tempBuffer[y.length()];
@@ -433,9 +461,10 @@ void handleReadRFID() {
         for(int m=0;m<y.length();m++){ // write to dataBlock array
           dataBlock[m] =y[m];
         }
+        
         //temporary code only, for writing something on specific block
         /*byte valuetowrite[]    = {
-          'C', 'S', 'P', 'G', ' ', 'M', 'E', 'T', 'E', 'R', ' ', '0', '0', '0', '1', 0x00
+          'C', 'S', 'P', 'G', ' ', 'M', 'E', 'T', 'E', 'R', ' ', '0', '0', '0', '3', 0x00
         };
         status = (MFRC522::StatusCode) mfrc522.MIFARE_Write(6, valuetowrite, 16);
         if (status != MFRC522::STATUS_OK) {
@@ -451,8 +480,12 @@ void handleReadRFID() {
         Serial.print(F("MIFARE_Write() failed: "));
         Serial.println(mfrc522.GetStatusCodeName(status));
         draw_str("Card Error.");
-        delay(2000);
         }else{
+        //write success! dismiss card transaction first before printing, printing takes too long
+        mfrc522.PICC_HaltA();
+        mfrc522.PCD_StopCrypto1();
+        //delay(500);
+    
         String temp = "Bal.: ";
         temp += y;
         String line2 = "Loaded!";
@@ -463,29 +496,9 @@ void handleReadRFID() {
         draw_str(screenBuffer2, screenBuffer);
 
         //print
-        printer.wake();       // MUST wake() before printing again, even if reset
-        printer.feed(2);
-        printer.justify('C');
-        printer.println(F("--------------------------------"));
-        printer.doubleHeightOn();
-        printer.println(F("LEADTECH INC"));
-        printer.doubleHeightOff();
-        printer.println(F("Solar Home Kit Loading Vendor"));
-
-        //print timestamp too
-        
-        printer.feed(1);
-        printer.println(F("Loaded:"));
-        printer.doubleHeightOn();
-        printer.println(itoa(load_amount, sBuff, 10));
-        printer.doubleHeightOff();
-        printer.println(F("This serves as your official"));
-        printer.println(F("receipt"));
-        printer.println(F("Thank You"));
-        printer.println(F("--------------------------------"));
-        printer.feed(2);
-        printer.sleep();      // Tell printer to sleep
-        delay(2000);
+        print_amount = load_amount;
+        print_timestamp = now();
+        if(ENABLE_PRINTING) printing = true;
         }
         done=0;
       }
@@ -736,9 +749,9 @@ void beep_buzzer(){
   delay(100);        // ...for 0.1 sec
   noTone(buzzer);     // Stop sound...*/
   //with self oscillating buzzer
-  /*digitalWrite(buzzer, HIGH);
+  digitalWrite(buzzer, HIGH);
   delay(100);        // ...for 0.1 sec
-  digitalWrite(buzzer, LOW);*/
+  digitalWrite(buzzer, LOW);
 }
 
 void beep_no_credit(){
@@ -757,17 +770,17 @@ void beep_no_credit(){
   noTone(buzzer);     // Stop sound...*/
 
   //with self oscillating buzzer
-  /*digitalWrite(buzzer, HIGH);
-  delay(100);        // ...for 0.1 sec
-  digitalWrite(buzzer, LOW);
-  delay(100);        // ...for 0.1 sec
   digitalWrite(buzzer, HIGH);
   delay(100);        // ...for 0.1 sec
   digitalWrite(buzzer, LOW);
   delay(100);        // ...for 0.1 sec
   digitalWrite(buzzer, HIGH);
   delay(100);        // ...for 0.1 sec
-  digitalWrite(buzzer, LOW);*/
+  digitalWrite(buzzer, LOW);
+  delay(100);        // ...for 0.1 sec
+  digitalWrite(buzzer, HIGH);
+  delay(100);        // ...for 0.1 sec
+  digitalWrite(buzzer, LOW);
 }
 
 void draw_loading(const char * strLine1, const char * strLine2, const char * strLine3, const char * strLine4, const char * strLine5) {
@@ -779,4 +792,37 @@ void draw_loading(const char * strLine1, const char * strLine2, const char * str
     u8g.drawStr( 0, 62, strLine4);
     u8g.drawStr( 50, 62, strLine5);
   } while( u8g.nextPage() );
+}
+
+void handlePrinter(int vAmount, time_t t){
+  char sBuff[5];
+  
+  //print
+  printer.wake();       // MUST wake() before printing again, even if reset
+  printer.feed(2);
+  printer.justify('C');
+  printer.println(F("--------------------------------"));
+  printer.doubleHeightOn();
+  printer.println(F("AGAK CENTER"));
+  printer.doubleHeightOff();
+  printer.println(F("Solar Power Prepaid Vendor"));
+
+  printer.feed(1);
+  printer.println(F("Loaded:"));
+  printer.doubleHeightOn();
+  printer.println(itoa(vAmount, sBuff, 10));
+  printer.doubleHeightOff();
+  printer.feed(1);
+
+  //time stamp
+  GetDateInStr(strDate, weekday(t), month(t), day(t), year(t));
+  printer.println(strDate);
+  GetTimeInStr(strTime, hour(t), minute(t), second(t));
+  printer.println(strTime);
+  printer.println(F("This serves as your official"));
+  printer.println(F("receipt, Thank You!"));
+  printer.println(F("--------------------------------"));
+  printer.feed(2);
+  printer.sleep();      // Tell printer to sleep
+  delay(2000);
 }

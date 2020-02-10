@@ -26,6 +26,12 @@
 #define TIME_REQUEST  7    // ASCII bell character requests a time sync message 
 #define GMT_plus_8 28800 // +8hrs value in seconds added
 
+//RTC RAM locations, partitions
+#define RTC_RAM_END 31
+
+//commands
+#define ADMIN_SET_TIME_RATE "CSPG_set_time_rate" //change load rate
+
 MFRC522::MIFARE_Key key;
 constexpr uint8_t RST_PIN = 9;          // Configurable, see typical pin layout above
 constexpr uint8_t SS_PIN = 10;         // Configurable, see typical pin layout above
@@ -46,6 +52,7 @@ int pin_WAKE = 2; // Pin for Wake
 boolean active=false;
 boolean screen_sleep = false;
 byte uid[] = {0x54, 0x45, 0x53, 0x54, 0x5f, 0x43, 0x41, 0x52, 0x44, 0x31, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+byte meter_identity[]    = {'C', 'S', 'P', 'G', ' ', 'M', 'E', 'T', 'E', 'R', ' ', '0', '0', '0', '1', 0x00 };
 char strTime[9]; //Lateral time string variable to display
 char strDate[15]; //Lateral time string variable to display
 char strLine1[9];
@@ -74,7 +81,11 @@ byte dataBlock[]    = {  // Initial DataBlock array
   0x00, 0x00, 0x00, 0x00  
 };
 
-uint8_t ramBuffer[31]; // RAM Buffer Array for RTC
+//RTC stuff including its RAM, store config on its RAM
+//32 x 8 RAM
+uint8_t ramTimeRate[sizeof(long)];
+uint8_t ramBuffer[RTC_RAM_END]; // RAM Buffer Array for RTC
+enum ramData {TIME_END, TIME_RATE};
 
 //u8glib
 //U8GLIB_SSD1306_128X64 u8g(18, 20, 26, 24);  // SW SPI Com: SCK = 13, MOSI = 11, CS = 10, A0 = 9
@@ -201,6 +212,11 @@ void loop()
 {
   handleTimeout();
   handleCurrentCheck();
+
+  if(Serial.available()){
+    handleAdminAccess();
+  }
+  
   if (Serial.available()) { // Time syncer via Serial monitor
     Serial.println("[SYS]Serial Monitor Activity");
     processSyncMessage();
@@ -376,6 +392,8 @@ void handleReadRFID() {
         Serial.println(mfrc522.GetStatusCodeName(status));
         return;
     }
+
+    //read block 5 for UID verification
     Serial << "\n[SYS][RFID] Reading Auth Data\n";
      status = (MFRC522::StatusCode) mfrc522.MIFARE_Read(5, buffer, &size);
     if (status != MFRC522::STATUS_OK) {
@@ -387,6 +405,27 @@ void handleReadRFID() {
     Serial << "\n" <<load_auth <<"\n";
     for(int i=0;i<16;i++){
       if(load_auth[i] != uid[i]){
+        draw_str("Invalid RFID");
+        Serial << "[SYS]Invalid RFID UID";
+        mfrc522.PICC_HaltA();
+        mfrc522.PCD_StopCrypto1();
+        delay(2000);
+        return;
+      }
+    }
+
+    //read block 6, check card association to which meter
+    Serial << "\n[SYS][RFID] Reading Auth Data\n";
+     status = (MFRC522::StatusCode) mfrc522.MIFARE_Read(6, buffer, &size);
+    if (status != MFRC522::STATUS_OK) {
+        draw_str("RFID Data Error");
+        Serial.print(F("MIFARE_Read() failed: "));
+        Serial.println(mfrc522.GetStatusCodeName(status));
+    }
+    load_auth = dump_byte_array(buffer, 16);
+    Serial << "\n" <<load_auth <<"\n";
+    for(int i=0;i<16;i++){
+      if(load_auth[i] != meter_identity[i]){
         draw_str("Invalid RFID");
         Serial << "[SYS]Invalid RFID UID";
         mfrc522.PICC_HaltA();
@@ -471,7 +510,7 @@ void handleActive() {
     Serial << "\n[SYS][OUTPUT]Added\n";
   }
   //TODO: Use the CMOS RAM to store remaining time. Else, shit happens
-  writeBuffer(timeLeft);
+  writeToRtcRam(timeLeft, TIME_END);
   Serial << "\n[SYS][EPOCH]=" << timeLeft << "\n";
 }
 
@@ -577,6 +616,17 @@ void processSyncMessage() {
   }
 }
 
+void handleAdminAccess(){
+  long lBuffer;
+  
+  if(Serial.find(ADMIN_SET_TIME_RATE)) {
+    lBuffer = Serial.parseInt();
+    time_rate = lBuffer;
+    Serial.println("Time rate changed to:");
+    Serial.println(time_rate, DEC);
+  }
+}
+
 time_t requestSync()
 {
   Serial.write(TIME_REQUEST);  
@@ -625,7 +675,7 @@ void initBuffer(){
 void writeBuffer(long timestamp){
   String temp1;
   temp1 += timestamp;
-  byte buff[31];
+  byte buff[RTC_RAM_END];
   for(int i=0;i<temp1.length();i++){
     buff[i] = (int) temp1[i];
   }
@@ -640,6 +690,31 @@ void writeBuffer(long timestamp){
   RTC.readRAM(ramBuffer);
   bufferDump("Reading Newly input data");
   
+}
+
+void writeToRtcRam(long timestamp, ramData vData){
+  String temp1;
+  temp1 += timestamp;
+  byte buff[RTC_RAM_END];
+  
+  if(vData==TIME_END){
+    for(int i=0;i<temp1.length();i++){
+    buff[i] = (int) temp1[i];
+    }
+    initBuffer();
+    RTC.readRAM(ramBuffer);
+  
+    //copy the content of saved time rate from RAM to buff
+    for(int i=RTC_RAM_END-sizeof(ramTimeRate); i<RTC_RAM_END; i++){
+      buff[i]=ramBuffer[i];
+    }
+    RTC.writeEN(true);
+    RTC.writeRAM(buff);
+    RTC.writeEN(false);
+    initBuffer();
+    RTC.readRAM(ramBuffer);
+    bufferDump("Reading Newly input data");
+  }
 }
 
 //buzzer stuffs

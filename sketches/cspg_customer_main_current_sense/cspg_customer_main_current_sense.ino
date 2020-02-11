@@ -21,6 +21,7 @@
 #include "hardware.h"
 #include <Streaming.h> // Easy Serial out
 #include <SerialCommand.h> //Using serialcommand by Steven Cogswell https://github.com/scogswell/ArduinoSerialCommand
+#include <EEPROM.h>
 
 #define TIME_REQUEST  7    // ASCII bell character requests a time sync message 
 #define GMT_plus_8 28800 // +8hrs value in seconds added
@@ -28,12 +29,16 @@
 //debug
 #define DISPLAY_CURRENT_VALUE 0
 
-//RTC RAM locations, partitions
-#define RTC_RAM_END 31
+//RTC CMOS/RAM locations, partitions
+#define RTC_RAM_SIZE 31
 #define LEN_TIME_RATE 8
-#define LEN_TIME_STAMP 10
-#define LOC_TIME_STAMP 0
-#define LOC_TIME_RATE LOC_TIME_STAMP+LEN_TIME_STAMP+1 //additional +1 since a null character is inserted, waste of space!
+#define TIME_STOP_LOC 0
+#define TIME_STOP_SIZE 10
+#define TIME_RATE_LOC TIME_STOP_LOC+TIME_STOP_SIZE+1 //additional +1 since a null character is inserted, waste of space!
+
+//EEPROM locations
+#define TIME_STOP_EEPROM_LOC 0
+#define TIME_RATE_EEPROM_LOC 16
 
 SerialCommand SCmd; //serial command instance
 
@@ -49,12 +54,11 @@ time_t t = now(); // Current time state
 //long time_rate= 259200; // time rate per tap in seconds 
 //long time_rate = 10; //10 seconds
 long time_rate = 3600; //1hr
-int load_rate = 10; // Load to decrease from card
+int load_rate = 10; // amount to deduct from card
 int screen_timeout = 30; // Seconds before screen turns off
 time_t screen_now = now(); // Seconds while action.
 int pin_OUTPUT = 3; // Pin for power output
-//int pin_WAKE = 2; // Pin for Wake
-int pin_WAKE = 45; // Pin for Wake, temporary only
+
 boolean active=false;
 boolean screen_sleep = false;
 byte uid[] = {0x54, 0x45, 0x53, 0x54, 0x5f, 0x43, 0x41, 0x52, 0x44, 0x31, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
@@ -90,7 +94,7 @@ byte dataBlock[]    = {  // Initial DataBlock array
 //RTC stuff including its RAM, store config on its RAM
 //32 x 8 RAM
 uint8_t ramTimeRate[sizeof(long)];
-uint8_t ramBuffer[RTC_RAM_END]; // RAM Buffer Array for RTC
+uint8_t CMOS_buffer[RTC_RAM_SIZE]; // RAM Buffer Array for RTC
 enum ramData {TIME_END, TIME_RATE};
 
 //u8glib
@@ -108,7 +112,7 @@ void setup()
   pinMode(8, OUTPUT);
   pinMode(pin_OUTPUT, OUTPUT);
   digitalWrite(pin_OUTPUT, HIGH);
-  pinMode(pin_WAKE, INPUT_PULLUP);
+  pinMode(PIN_WAKE, INPUT_PULLUP);
   Serial.begin(115200);
   Serial.println("[SYS][BOOT]CPSG System");
   Serial.println(BUILD_NUMBER);
@@ -141,67 +145,34 @@ void setup()
   u8g.setFont(u8g_font_unifont);
 
   // Check clock oscillation  
-  if (RTC.haltRTC())
-  Serial << "[SYS][BOOT]RTC has been reset!";
-  else
-  Serial << "[SYS][BOOT]RTC is good";
-//    draw_str("RTC is running.");
-    
-//  delay(1000);
-  
-  // Check write-protection
-//  if (RTC.writeEN())
-//    draw_str("Write allowed");
-//  else
-//    draw_str("Write protected");
-
-//  delay ( 1000 );
+  if (RTC.haltRTC()) Serial << "\n[SYS][BOOT]RTC has been reset!";
+  else Serial << "\n[SYS][BOOT]RTC is running";
 
   // Setup Time library
-//  draw_str("RTC Sync");
   setTime(12,9,0,5,10,2019); //hr,min,sec,day,mnth,yr
   setSyncProvider(RTC.get); // the function to get the time from the RTC
   
-  if(timeStatus() == timeSet)
-//    draw_str("RTC Synced");
-Serial << "[SYS][BOOT]RTC Synced";
-  else
-  Serial << "[SYS][BOOT]RTC Warning!";
-//    draw_str("RTC FAILED");
-
-//  delay ( 1000 );
+  if(timeStatus() == timeSet) Serial << "\n[SYS][BOOT]RTC Synced";
+  else Serial << "\n[SYS][BOOT]RTC Warning!";
 
   SPI.begin();      // Init SPI bus
   mfrc522.PCD_Init();   // Init MFRC522
+  #ifdef DEBUG_MODE
+  Serial.print("\nRFID Reader ");
   mfrc522.PCD_DumpVersionToSerial();  // Show details of PCD - MFRC522 Card Reader details
+  #endif
     // Prepare the key (used both as key A and as key B)
     // using FFFFFFFFFFFFh which is the default at chip delivery from the factory
     for (byte i = 0; i < 6; i++) {
         key.keyByte[i] = 0xFF;
     }
+  #ifdef DEBUG_MODE
   dump_byte_array(key.keyByte, MFRC522::MF_KEY_SIZE);
-  initBuffer();
-  if(digitalRead(pin_WAKE)==HIGH){
-    RTC.readRAM(ramBuffer);
-    bufferDump("Reading CMOS Data...");
-    String myString = String((char*)ramBuffer);
-    Serial.println(myString);
-    if(myString.toInt() > now()){
-      Serial << "\nResuming Timer Operations";
-      timeLeft = myString.toInt();
-      active = true;
-      digitalWrite(pin_OUTPUT,LOW);
-    } else{
-      Serial << "\nTimer already has expired. Ignoring.";
-      active = false;
-    }
-  }
-//  else if(digitalRead(pin_WAKE)==LOW){
-//   initBuffer();
-//   Serial << "[SYS] Clearing CMOS RAM" ;
-//   writeBuffer(0);
-//  }
+  #endif
   
+  //Read CMOS settings
+  //recover time out data
+  checkRemainingTimeAndPowerUp();  
   
   screen_now = now() + screen_timeout;
   Serial << "\n[SYS][BOOT] Ready.";
@@ -213,10 +184,13 @@ Serial << "[SYS][BOOT]RTC Synced";
   timeCurrentCheckNow = now() + checkCurrentEvery;
 
   //serial commands
-  SCmd.addCommand("DUMP", CMD_dump_cmos);
-  SCmd.addCommand("SETRATE", CMD_set_rate);
+  SCmd.addCommand("DUMP_CMOS", CMD_dump_cmos);
+  SCmd.addCommand("SET_RATE", CMD_set_rate);
   SCmd.addCommand("TIME", CMD_set_time);
-  SCmd.addCommand("TEST", CMD_test_function);
+  SCmd.addCommand("TEST", CMD_test_function); //for test only
+  SCmd.addCommand("CLEAR_TIMEOUT", CMD_clear_timeout);
+  SCmd.addCommand("DUMP_EEPROM", CMD_dump_eeprom);
+  SCmd.addDefaultHandler(unrecognized);
 }
 
 void loop()
@@ -226,7 +200,7 @@ void loop()
 
   SCmd.readSerial(); //serial command handler
   
-  if(digitalRead(pin_WAKE) == LOW){// wake button handler
+  if(digitalRead(PIN_WAKE) == LOW){// wake button handler
     Serial.println("[SYS][UI] Wake Pressed");
     if(fault==overcurrent){
       checkRemainingTimeAndPowerUp();
@@ -235,24 +209,16 @@ void loop()
     else wakeScreen();
   }
   
-  
   // Current Time Handler
-  if(!active){
+  if(!active){ //if no load
     
-    GetTimeInStr(strTime, hour(), minute(), second());
+    GetTimeInStr(strTime, hourFormat12(), minute(), second(), isAM());
     GetDateInStr(strDate, weekday(), month(), day(), year());
     draw_str(strTime, dayStr(weekday()), strDate);
   }
-  else{
-    
-    if(now()<timeLeft){
-      drawTime();
-    }
-    else if(now()>timeLeft){
-      powerOff();
-    }
-  }
-
+  //else drawTime();
+ // if(now()<timeLeft) drawTime();
+ 
   //check current every 10 seconds
   //store time now
   //check if elapsed time is 5 seconds
@@ -284,7 +250,7 @@ void loop()
 }
 
 void powerOff(){
-active=false;
+      active=false;
       Serial << "\n[SYS][OUTPUT] Power deactivated.\n";
       beep_no_credit();
       digitalWrite(pin_OUTPUT, HIGH);
@@ -297,7 +263,7 @@ active=false;
 }
 
 void powerOff_overcurrent(){
-active=false;
+      active=false;
       Serial << "\n[SYS][OUTPUT] Overload! Power deactivated.\n";
       beep_no_credit();
       digitalWrite(pin_OUTPUT, HIGH);
@@ -315,11 +281,9 @@ void drawTime(){
  long minutes ((timeLeft - now())/60 - hours*60 - days * 60 * 24 );
  long seconds = ((((timeLeft - now()) - minutes*60) - hours * 60 * 60)  - days * 60 * 60 * 24);
 
-
-//    Serial << "\n" << days << ":" << hours << ":" <<minutes <<":" << seconds <<"\n" ;
-convertString(strLine1, days );
-GetTimeInStr(strLine2, hours, minutes, seconds);
-    draw_str(strLine1, strLine2);
+ convertString(strLine1, days );
+ GetTimeInStr(strLine2, hours, minutes, seconds); //need to fix this
+ draw_str(strLine1, strLine2);
 }
 
 //Utils
@@ -502,7 +466,7 @@ void handleReadRFID() {
 
 //Power Handler Section
 void handleActive() {
-  initBuffer();
+  initCMOSBuffer();
   Serial << "\nTime Rate:" << time_rate << "\n";
   if(!active){
     active = true;
@@ -559,6 +523,50 @@ void GetTimeInStr(char * vString, int vHour, int vMinute, int vSecond){
     itoa(vSecond, tStr2, 10);
     strcat(tStr1, tStr2);
   }
+
+  strcpy(vString, tStr1);
+}
+
+void GetTimeInStr(char * vString, int vHour, int vMinute, int vSecond, bool am_pm){
+  char tStr1[5];
+  char tStr2[5];
+
+  //Display always in double digit
+  if(vHour < 10){
+    itoa(0, tStr1, 10);
+    itoa(vHour, tStr2, 10);
+    strcat(tStr1, tStr2);
+  }
+  else{
+    itoa(vHour, tStr1, 10);
+  }
+  
+  strcat(tStr1, ":");
+  
+  if(vMinute < 10){
+    strcat(tStr1, "0");
+    itoa(vMinute, tStr2, 10);
+    strcat(tStr1, tStr2);
+  }
+  else{
+    itoa(vMinute, tStr2, 10);
+    strcat(tStr1, tStr2);
+  }
+  
+  strcat(tStr1, ":");
+  
+  if(vSecond < 10){
+    strcat(tStr1, "0");
+    itoa(vSecond, tStr2, 10);
+    strcat(tStr1, tStr2);
+  }
+  else{
+    itoa(vSecond, tStr2, 10);
+    strcat(tStr1, tStr2);
+  }
+
+  if(am_pm) strcat(tStr1, " AM");
+  else strcat(tStr1, " PM");
   
   strcpy(vString, tStr1);
 }
@@ -627,8 +635,8 @@ void bufferDump(const char *msg)
   for (int i=0; i<31; i++)
   {
     //Serial.print("0x");
-    if(ramBuffer[i] <= 0xF) Serial.print("0");
-    Serial.print(ramBuffer[i], HEX);
+    if(CMOS_buffer[i] <= 0xF) Serial.print("0");
+    Serial.print(CMOS_buffer[i], HEX);
     Serial.print(" ");
     if(!((i+1) % 8)) Serial.println();
   }
@@ -636,68 +644,79 @@ void bufferDump(const char *msg)
   Serial.println("--------------------------------------------------------");
 }
 
-void initBuffer(){
+void initCMOSBuffer(){
  for(int i=0; i<31;i++){
-  ramBuffer[i] = 0x00; 
+  CMOS_buffer[i] = 0x00; 
  }
 }
 
 void writeBuffer(long timestamp){
   String temp1;
   temp1 += timestamp;
-  byte buff[RTC_RAM_END];
+  byte buff[RTC_RAM_SIZE];
   for(int i=0;i<temp1.length();i++){
     buff[i] = (int) temp1[i];
   }
-  initBuffer();
+  initCMOSBuffer();
   for(int i=0;i<temp1.length();i++){
-    ramBuffer[i] = buff[i];
+    CMOS_buffer[i] = buff[i];
   }
   RTC.writeEN(true);
-  RTC.writeRAM(ramBuffer);
+  RTC.writeRAM(CMOS_buffer);
   RTC.writeEN(false);
-  initBuffer();
-  RTC.readRAM(ramBuffer);
+  initCMOSBuffer();
+  RTC.readRAM(CMOS_buffer);
   bufferDump("Reading Newly input data");
   
 }
 
-//names are confusing, try to fix these
+//RTC RAM/CMOS operation handler
 //CMOS refers to RTC RAM!
+//names are confusing, try to fix these
+
+void CMOS_write(){
+  
+  RTC.writeEN(true);
+  RTC.writeRAM(CMOS_buffer);
+  RTC.writeEN(false);
+
+  //dump CMOS
+  initCMOSBuffer();
+  RTC.readRAM(CMOS_buffer);
+  bufferDump("Reading Newly input data");
+}
+
+void CMOS_clear_time_out(){
+  
+  initCMOSBuffer();
+  RTC.readRAM(CMOS_buffer); //get CMOS contents
+  for(int i=TIME_STOP_LOC; i<TIME_STOP_SIZE; i++) CMOS_buffer[i] = 0; //clear time out partition
+  CMOS_write();
+}
+
 void writeToRtcRam(long vTime, ramData vData){
   String temp1;
   temp1 += vTime;
-  byte buff[RTC_RAM_END];
+  byte buff[RTC_RAM_SIZE];
   
   if(vData==TIME_END){
 
-    initBuffer();
-    RTC.readRAM(ramBuffer); //get CMOS contents
+    initCMOSBuffer();
+    RTC.readRAM(CMOS_buffer); //get CMOS contents
     
-    //for(int i=0; i<=LEN_TIME_STAMP; i++) ramBuffer[i] = 0; //clear time out partition
-    for(int i=0; i<=LEN_TIME_STAMP; i++) ramBuffer[i] = (int) temp1[i];
+    for(int i=0; i<=TIME_STOP_SIZE; i++) CMOS_buffer[i] = (int) temp1[i];
     
-    RTC.writeEN(true);
-    RTC.writeRAM(ramBuffer);
-    RTC.writeEN(false);
-    initBuffer();
-    RTC.readRAM(ramBuffer);
-    bufferDump("Reading Newly input data");
+    CMOS_write();
   }
   if(vData==TIME_RATE){
 
-    initBuffer();
-    RTC.readRAM(ramBuffer); //get CMOS contents
+    initCMOSBuffer();
+    RTC.readRAM(CMOS_buffer); //get CMOS contents
     
-    for(int i=LOC_TIME_RATE; i<=LEN_TIME_RATE; i++) ramBuffer[i] = 0; //clear time rate partition
-    for(int i=0; i<=LEN_TIME_RATE; i++) ramBuffer[i+LOC_TIME_RATE] = (int) temp1[i]; //copy contents to partition
+    for(int i=TIME_RATE_LOC; i<=LEN_TIME_RATE; i++) CMOS_buffer[i] = 0; //clear time rate partition
+    for(int i=0; i<=LEN_TIME_RATE; i++) CMOS_buffer[i+TIME_RATE_LOC] = (int) temp1[i]; //copy contents to partition
     
-    RTC.writeEN(true);
-    RTC.writeRAM(ramBuffer);
-    RTC.writeEN(false);
-    initBuffer();
-    RTC.readRAM(ramBuffer);
-    bufferDump("Reading Newly input data");
+    CMOS_write();
   }
 }
 
@@ -807,30 +826,29 @@ void handleOvercurrentWarning(){
 }
 
 void checkRemainingTimeAndPowerUp(){ //recover from overcurrent shutdown, don't mind the name lol
-   //these snippets are from above code starting at line 164, maybe make a function for this?
-    initBuffer();
-  
-    RTC.readRAM(ramBuffer);
-    bufferDump("Reading CMOS Data...");
-    String myString = String((char*)ramBuffer);
-    Serial.println(myString);
-    if(myString.toInt() > now()){
-      Serial << "\nResuming Timer Operations";
-      timeLeft = myString.toInt();
-      active = true;
-      digitalWrite(pin_OUTPUT,LOW);
-    } else{
-      Serial << "\nTimer already has expired. Ignoring.";
-      active = false;
-    }
-  
+   
+  initCMOSBuffer();
+
+  RTC.readRAM(CMOS_buffer);
+  bufferDump("\nReading CMOS Data...");
+  String myString = String((char*)CMOS_buffer);
+  Serial.println(myString);
+  if(myString.toInt() > now()){
+    Serial << "\nResuming Timer Operations";
+    timeLeft = myString.toInt();
+    active = true;
+    digitalWrite(pin_OUTPUT,LOW);
+  } else{
+    Serial << "\nTimer already has expired. Ignoring.";
+    active = false;
+  }
 }
 
 //serial commands
 void CMD_dump_cmos(){
 
   Serial.println();
-  RTC.readRAM(ramBuffer);
+  RTC.readRAM(CMOS_buffer);
   bufferDump("Dumping RTC RAM"); 
 }
 
@@ -848,6 +866,7 @@ void CMD_set_rate(){
 
     Serial.print("\nSaving new time rate to CMOS");
     writeToRtcRam(time_rate, TIME_RATE);
+    save_time_rate_eeprom(lBuffer);
   }
 }
 
@@ -878,7 +897,7 @@ void CMD_set_time(){
   else{
     
     GetDateInStr(strDate, weekday(), month(), day(), year());
-    GetTimeInStr(strTime, hour(), minute(), second());
+    GetTimeInStr(strTime, hourFormat12(), minute(), second(), isAM());
     Serial.print("\n");
     Serial.print("System time is: ");
     Serial.print(dayStr(weekday()));
@@ -891,20 +910,64 @@ void CMD_set_time(){
 
 void CMD_test_function(){
 
-  byte buff[RTC_RAM_END];
+  time_t t = now();
+  Serial.println();
+  Serial.print(t, DEC);
+  Serial.print("\nWriting to eeprom");
+  save_time_stop_eeprom(t);
   
-  Serial.print("\n Time rate is: ");
-  Serial.println(time_rate);
+}
 
-  Serial.print("\n");
-  for (int i=0; i<RTC_RAM_END; i++)
-  {
-    if(buff[i] <= 0xF) Serial.print("0");
-    Serial.print(buff[i], HEX);
+long get_time_rate(){
+  //fetch time rate value from eeprom
+  long rate;
+  EEPROM.get(TIME_RATE_EEPROM_LOC, rate);
+  return rate;
+}
+
+void save_time_rate_eeprom(long rate){
+  //save time rate value to eeprom
+  
+  EEPROM.put(TIME_RATE_EEPROM_LOC, rate);
+}
+
+void save_time_stop_eeprom(time_t t){
+  
+  EEPROM.put(TIME_STOP_EEPROM_LOC, t);
+}
+
+time_t get_time_stop(){
+
+  time_t t;
+  EEPROM.get(TIME_STOP_EEPROM_LOC, t);
+  return t;
+}
+
+void unrecognized(){
+  
+  Serial.println("\nInvalid command!");
+}
+
+void CMD_clear_timeout(){
+
+  Serial.println("\nClearing time out entry");
+  CMOS_clear_time_out();
+}
+
+void CMD_dump_eeprom(){
+
+  byte value;
+
+  Serial.println("\nDumping EEPROM");
+  for (int addr=0; addr<EEPROM.length(); addr++){
+    
+    value = EEPROM.read(addr);
+
+    if(value <= 0xF) Serial.print("0");
+    Serial.print(value, HEX);
     Serial.print(" ");
-    if(!((i+1) % 8)) Serial.println();
+    if(!((addr+1) % 8)){ Serial.print(addr, DEC); Serial.println();}
   }
   Serial.println();
   Serial.println("--------------------------------------------------------");
-  
 }

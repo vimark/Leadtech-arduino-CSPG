@@ -49,8 +49,8 @@ MFRC522 mfrc522(SS_PIN, RST_PIN);  // Create MFRC522 instance
 // Init the DS1302
 // Set pins:  CE, IO,CLK
 DS1302RTC RTC(5, 6, 7); // RTC Module
-time_t timeLeft = now(); // must be a unix value
-time_t t = now(); // Current time state
+//time_t timeLeft = now(); // must be a unix value
+//time_t t = now(); // Current time state
 //long time_rate= 259200; // time rate per tap in seconds 
 //long time_rate = 10; //10 seconds
 long time_rate = 3600; //1hr
@@ -59,7 +59,7 @@ int screen_timeout = 30; // Seconds before screen turns off
 time_t screen_now = now(); // Seconds while action.
 int pin_OUTPUT = 3; // Pin for power output
 
-boolean active=false;
+boolean isActive=false; //flag if unit is powered on or is loaded with credits
 boolean screen_sleep = false;
 byte uid[] = {0x54, 0x45, 0x53, 0x54, 0x5f, 0x43, 0x41, 0x52, 0x44, 0x31, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 byte meter_identity[]    = {'C', 'S', 'P', 'G', ' ', 'M', 'E', 'T', 'E', 'R', ' ', '0', '0', '0', '1', 0x00 };
@@ -124,8 +124,6 @@ void setup()
   digitalWrite(22, LOW);
   digitalWrite(22, HIGH);
   draw_str("Booting");
-//  readRAM( uint8_t *p);
-//  writeRAM(uint8_t *p);
   
   //u8glib setup
   // assign default color value
@@ -145,11 +143,15 @@ void setup()
   u8g.setFont(u8g_font_unifont);
 
   // Check clock oscillation  
-  if (RTC.haltRTC()) Serial << "\n[SYS][BOOT]RTC has been reset!";
+  if (RTC.haltRTC()){
+    Serial << "\n[SYS][BOOT]RTC has been reset!";
+
+    // Setup Time library
+    Serial << "\n[SYS][BOOT]Setting RTC!";
+    setTime(12,9,0,5,10,2019); //hr,min,sec,day,mnth,yr
+  }
   else Serial << "\n[SYS][BOOT]RTC is running";
 
-  // Setup Time library
-  setTime(12,9,0,5,10,2019); //hr,min,sec,day,mnth,yr
   setSyncProvider(RTC.get); // the function to get the time from the RTC
   
   if(timeStatus() == timeSet) Serial << "\n[SYS][BOOT]RTC Synced";
@@ -170,14 +172,12 @@ void setup()
   dump_byte_array(key.keyByte, MFRC522::MF_KEY_SIZE);
   #endif
   
-  //Read CMOS settings
-  //recover time out data
-  checkRemainingTimeAndPowerUp();  
+  //Recover time out data from EEPROM
+  checkRemainingTimeAndPowerUp();
   
   screen_now = now() + screen_timeout;
   Serial << "\n[SYS][BOOT] Ready.";
-  //Add something below here that reads the CMOS RAM to read the remaining time. Most likely a UNIX timestamp, write to time_t timeLeft.
-
+  
   //buzzer
   pinMode(buzzer, OUTPUT); // Set buzzer - pin 4 as an output
 
@@ -191,6 +191,7 @@ void setup()
   SCmd.addCommand("CLEAR_TIMEOUT", CMD_clear_timeout);
   SCmd.addCommand("DUMP_EEPROM", CMD_dump_eeprom);
   SCmd.addDefaultHandler(unrecognized);
+
 }
 
 void loop()
@@ -210,15 +211,12 @@ void loop()
   }
   
   // Current Time Handler
-  if(!active){ //if no load
-    
-    GetTimeInStr(strTime, hourFormat12(), minute(), second(), isAM());
-    GetDateInStr(strDate, weekday(), month(), day(), year());
-    draw_str(strTime, dayStr(weekday()), strDate);
+  if(isActive==false){
+    OLED_displayTime(); //if not loaded, idling
+    isActive=false; //weird! the status is already false, but when this line is omitted it turns active status to true
   }
-  //else drawTime();
- // if(now()<timeLeft) drawTime();
- 
+  else OLED_displayRemainingTime();
+  
   //check current every 10 seconds
   //store time now
   //check if elapsed time is 5 seconds
@@ -228,18 +226,11 @@ void loop()
 
   if(checkingCurrentNow == true) checkCurrent();
   
-  // Warning!
-  /*if(timeStatus() != timeSet) {
-    //lcd.setCursor(0, 1);
-    //lcd.print(F("RTC ERROR: SYNC!"));
-    draw_str("RTC ERROR: SYNC!");
-  }*/
-
   //Read RFID
   if ( ! mfrc522.PICC_IsNewCardPresent()) {
     return;
   }
-
+  
   // Select one of the cards
   if ( ! mfrc522.PICC_ReadCardSerial()) {
     return;
@@ -247,10 +238,11 @@ void loop()
     wakeScreen();
     handleReadRFID(); // card read handler
   }
+  
 }
 
 void powerOff(){
-      active=false;
+      isActive=false;
       Serial << "\n[SYS][OUTPUT] Power deactivated.\n";
       beep_no_credit();
       digitalWrite(pin_OUTPUT, HIGH);
@@ -263,7 +255,7 @@ void powerOff(){
 }
 
 void powerOff_overcurrent(){
-      active=false;
+      isActive=false;
       Serial << "\n[SYS][OUTPUT] Overload! Power deactivated.\n";
       beep_no_credit();
       digitalWrite(pin_OUTPUT, HIGH);
@@ -275,11 +267,21 @@ void powerOff_overcurrent(){
 //      wakeScreen();
 }
 
-void drawTime(){
- long days =  ((timeLeft - now())/60/60/24);
- long hours = ((timeLeft - now())/60/60 - days * 24);
- long minutes ((timeLeft - now())/60 - hours*60 - days * 60 * 24 );
- long seconds = ((((timeLeft - now()) - minutes*60) - hours * 60 * 60)  - days * 60 * 60 * 24);
+void OLED_displayTime(){
+  
+  GetTimeInStr(strTime, hourFormat12(), minute(), second(), isAM());
+  GetDateInStr(strDate, weekday(), month(), day(), year());
+  draw_str(strTime, dayStr(weekday()), strDate);
+}
+
+void OLED_displayRemainingTime(){
+
+  time_t t = get_time_stop();
+  
+  long days =  ((t - now())/60/60/24);
+  long hours = ((t - now())/60/60 - days * 24);
+  long minutes ((t - now())/60 - hours*60 - days * 60 * 24 );
+  long seconds = ((((t - now()) - minutes*60) - hours * 60 * 60)  - days * 60 * 60 * 24);
 
  convertString(strLine1, days );
  GetTimeInStr(strLine2, hours, minutes, seconds); //need to fix this
@@ -447,6 +449,7 @@ void handleReadRFID() {
       line2.toCharArray(screenBuffer,line2.length()+1);
       draw_str(screenBuffer2, screenBuffer);
       handleActive();
+      updateTimeToStop();
       delay(2000);  
 //      wakeScreen();
       }
@@ -466,21 +469,24 @@ void handleReadRFID() {
 
 //Power Handler Section
 void handleActive() {
-  initCMOSBuffer();
-  Serial << "\nTime Rate:" << time_rate << "\n";
-  if(!active){
-    active = true;
-    digitalWrite(pin_OUTPUT,LOW);
-    Serial << "\n[SYS][OUTPUT]Power Active!\n";
-    
-    timeLeft = now() + time_rate;
-  }else{
-    timeLeft = timeLeft + time_rate;
-    Serial << "\n[SYS][OUTPUT]Added\n";
+  
+  if(isActive==false){
+    isActive = true;
+    digitalWrite(pin_OUTPUT,LOW); 
   }
-  //TODO: Use the CMOS RAM to store remaining time. Else, shit happens
-  writeToRtcRam(timeLeft, TIME_END);
-  Serial << "\n[SYS][EPOCH]=" << timeLeft << "\n";
+
+  Serial.println("\n[SYS][OUTPUT]Power Active!");
+}
+
+void updateTimeToStop(){
+
+  time_t tStop = get_time_stop();
+  long tRate = get_time_rate();
+  
+  if(tStop < now()) tStop = now() + tRate;
+  else tStop += tRate;
+  
+  save_time_stop_eeprom(tStop);
 }
 
 //Miscellaneous Utility Functions
@@ -825,22 +831,19 @@ void handleOvercurrentWarning(){
   delay(1000);
 }
 
-void checkRemainingTimeAndPowerUp(){ //recover from overcurrent shutdown, don't mind the name lol
-   
-  initCMOSBuffer();
+void checkRemainingTimeAndPowerUp(){
 
-  RTC.readRAM(CMOS_buffer);
-  bufferDump("\nReading CMOS Data...");
-  String myString = String((char*)CMOS_buffer);
-  Serial.println(myString);
-  if(myString.toInt() > now()){
+  time_t t = get_time_stop();
+  
+  if(t > now()){
+        
     Serial << "\nResuming Timer Operations";
-    timeLeft = myString.toInt();
-    active = true;
-    digitalWrite(pin_OUTPUT,LOW);
-  } else{
+    handleActive();
+  } 
+  else{
+    
     Serial << "\nTimer already has expired. Ignoring.";
-    active = false;
+    isActive = false;
   }
 }
 
@@ -910,12 +913,7 @@ void CMD_set_time(){
 
 void CMD_test_function(){
 
-  time_t t = now();
-  Serial.println();
-  Serial.print(t, DEC);
-  Serial.print("\nWriting to eeprom");
-  save_time_stop_eeprom(t);
-  
+  Serial.println("\nactive status is: "); Serial.println(isActive, DEC); 
 }
 
 long get_time_rate(){
@@ -950,8 +948,10 @@ void unrecognized(){
 
 void CMD_clear_timeout(){
 
-  Serial.println("\nClearing time out entry");
-  CMOS_clear_time_out();
+  Serial.println("\nClearing time out entry and powering off");
+  
+  save_time_stop_eeprom(0);
+  powerOff();
 }
 
 void CMD_dump_eeprom(){

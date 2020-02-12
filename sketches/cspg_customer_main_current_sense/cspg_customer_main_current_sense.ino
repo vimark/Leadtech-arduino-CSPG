@@ -1,3 +1,5 @@
+#include <DS1302RTC.h>
+
 #define VERSION "v0.004b" // Software Version
 #define DEV_MESSAGE "Roland Kim Andre Solon"
 #define BUILD_NUMBER "Build 0001 06/20/19"
@@ -913,7 +915,8 @@ void CMD_set_time(){
 
 void CMD_test_function(){
 
-  Serial.println("\nactive status is: "); Serial.println(isActive, DEC); 
+  time_t t = RTC.get();
+  Serial.println("\nRTC Time is: "); Serial.print(hourFormat12(t), DEC); Serial.print(":"); Serial.print(minute(t), DEC); Serial.print(":"); Serial.print(second(t), DEC);
 }
 
 long get_time_rate(){

@@ -1,6 +1,7 @@
 //Hardware pin assignment on Gizduino X board
 
 #define USING_VENDOR_HARDWARE //if using vendor hardware instead of client hardware, the two hardware have different wiring
+#define USING_SELF_OSC_BUZZER
 #define DEBUG_MODE //censor some info e.g. keys
 
 #define PIN_SENSE_CURRENT A0

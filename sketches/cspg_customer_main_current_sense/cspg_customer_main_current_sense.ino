@@ -9,9 +9,10 @@
 //June 2019
 //Author: trosh, kim
 
-//snippets used from
+//libraries
 //DS1302 RTC from (https://playground.arduino.cc/Main/DS1302RTC/)
 //OLED graphics lib from U8glib code (http://code.google.com/p/u8glib/)
+//Time https://github.com/PaulStoffregen/Time
 //Feb 2020, Add current sense and overcurrent shut-off
 
 #include <DS1302RTC.h>
@@ -29,7 +30,6 @@
 #define GMT_plus_8 28800 // +8hrs value in seconds added
 
 //debug
-#define DISPLAY_CURRENT_VALUE 0
 
 //RTC CMOS/RAM locations, partitions
 #define RTC_RAM_SIZE 31
@@ -73,13 +73,14 @@ char strLine2[15];
 //current sense pin and variables
 const int analogPin1 = PIN_SENSE_CURRENT;
 time_t timeCurrentCheckNow;
-int checkCurrentEvery = 5;
+int checkCurrentEvery = 1;
 boolean checkingCurrentNow = false;
 int currentValue = 0;
 int currentValue_limit = 1500;
 int timeOvercurrent = 0;
 int timeOvercurrentGracePeroid = 6; //this is dependent to checkCurrentEvery, timeOvercurrentGracePeroid x checkCurrentEvery
 boolean overCurrent = false;
+boolean isDisplayCurrent = false;
 enum faultType {none, overcurrent, other}; //maybe use this for other fault type?
 faultType fault = none;
 
@@ -121,8 +122,8 @@ void setup()
   Serial.println(VERSION);
   Serial.println(DEV_MESSAGE);
   Serial.println(UID);
+  
   //reset OLED display
-  Serial << "\nRate:" << time_rate << "\n";
   digitalWrite(22, LOW);
   digitalWrite(22, HIGH);
   draw_str("Booting");
@@ -188,10 +189,14 @@ void setup()
   //serial commands
   SCmd.addCommand("DUMP_CMOS", CMD_dump_cmos);
   SCmd.addCommand("SET_RATE", CMD_set_rate);
+  SCmd.addCommand("RATE", CMD_display_rate);
   SCmd.addCommand("TIME", CMD_set_time);
+  SCmd.addCommand("TIME_RTC", CMD_time_rtc);
+  SCmd.addCommand("TIMEOUT", CMD_display_timeout);
   SCmd.addCommand("TEST", CMD_test_function); //for test only
   SCmd.addCommand("CLEAR_TIMEOUT", CMD_clear_timeout);
   SCmd.addCommand("DUMP_EEPROM", CMD_dump_eeprom);
+  SCmd.addCommand("CURRENT", CMD_current);
   SCmd.addDefaultHandler(unrecognized);
 
 }
@@ -217,7 +222,10 @@ void loop()
     OLED_displayTime(); //if not loaded, idling
     isActive=false; //weird! the status is already false, but when this line is omitted it turns active status to true
   }
-  else OLED_displayRemainingTime();
+  else{
+    if(isTimeUp()) powerOff();
+    else OLED_displayRemainingTime();
+  }
   
   //check current every 10 seconds
   //store time now
@@ -731,32 +739,24 @@ void writeToRtcRam(long vTime, ramData vData){
 //buzzer stuffs
 
 void beep_buzzer(){
-  //for no self oscilling buzzer
-  /*tone(buzzer, 1500); // Send 1KHz sound signal...
-  delay(100);        // ...for 0.1 sec
-  noTone(buzzer);     // Stop sound...*/
+  
   //with self oscillating buzzer
+#ifdef USING_SELF_OSC_BUZZER
   digitalWrite(buzzer, HIGH);
   delay(100);        // ...for 0.1 sec
   digitalWrite(buzzer, LOW);
+#else
+ //for no self oscilling buzzer
+  tone(buzzer, 1500); // Send 1KHz sound signal...
+  delay(100);        // ...for 0.1 sec
+  noTone(buzzer);     // Stop sound...
+#endif
 }
 
 void beep_no_credit(){
 
-  //for no self oscilling buzzer
-  /*tone(buzzer, 1500); // Send 1KHz sound signal...
-  delay(100);        // ...for 0.1 sec
-  noTone(buzzer);     // Stop sound...
-  delay(100);        // ...for 0.1 sec
-  tone(buzzer, 1500); // Send 1KHz sound signal...
-  delay(100);        // ...for 0.1 sec
-  noTone(buzzer);     // Stop sound...
-  delay(100);        // ...for 0.1 sec
-  tone(buzzer, 1500); // Send 1KHz sound signal...
-  delay(100);        // ...for 0.1 sec
-  noTone(buzzer);     // Stop sound...*/
-
   //with self oscillating buzzer
+#ifdef USING_SELF_OSC_BUZZER
   digitalWrite(buzzer, HIGH);
   delay(100);        // ...for 0.1 sec
   digitalWrite(buzzer, LOW);
@@ -768,36 +768,53 @@ void beep_no_credit(){
   digitalWrite(buzzer, HIGH);
   delay(100);        // ...for 0.1 sec
   digitalWrite(buzzer, LOW);
+#else
+  //for no self oscilling buzzer
+  tone(buzzer, 1500); // Send 1KHz sound signal...
+  delay(100);        // ...for 0.1 sec
+  noTone(buzzer);     // Stop sound...
+  delay(100);        // ...for 0.1 sec
+  tone(buzzer, 1500); // Send 1KHz sound signal...
+  delay(100);        // ...for 0.1 sec
+  noTone(buzzer);     // Stop sound...
+  delay(100);        // ...for 0.1 sec
+  tone(buzzer, 1500); // Send 1KHz sound signal...
+  delay(100);        // ...for 0.1 sec
+  noTone(buzzer);     // Stop sound...
+#endif
 }
 
 void double_beep(){
-  //for no self oscilling buzzer
-  /*tone(buzzer, 1500); // Send 1KHz sound signal...
+  
+  //with self oscillating buzzer
+#ifdef USING_SELF_OSC_BUZZER
+  digitalWrite(buzzer, HIGH);
+  delay(100);        // ...for 0.1 sec
+  digitalWrite(buzzer, LOW);
+  delay(100);        // ...for 0.1 sec
+  digitalWrite(buzzer, HIGH);
+  delay(100);        // ...for 0.1 sec
+  digitalWrite(buzzer, LOW);
+  delay(100);        // ...for 0.1 sec
+#else
+  //for non self oscilling buzzer
+  tone(buzzer, 1500); // Send 1KHz sound signal...
   delay(100);        // ...for 0.1 sec
   noTone(buzzer);     // Stop sound...
   delay(100);        // ...for 0.1 sec
   tone(buzzer, 1500); // Send 1KHz sound signal...
   delay(100);        // ...for 0.1 sec
   noTone(buzzer);     // Stop sound...
-  delay(100);        // ...for 0.1 sec*/
-
-  //with self oscillating buzzer
-  digitalWrite(buzzer, HIGH);
   delay(100);        // ...for 0.1 sec
-  digitalWrite(buzzer, LOW);
-  delay(100);        // ...for 0.1 sec
-  digitalWrite(buzzer, HIGH);
-  delay(100);        // ...for 0.1 sec
-  digitalWrite(buzzer, LOW);
-  delay(100);        // ...for 0.1 sec
+#endif
 }
 
 //current check
 void handleCurrentCheck(){
 
-  if(  timeCurrentCheckNow - now() <= 0){
+  if(timeCurrentCheckNow - now() <= 0){
     currentValue = map(analogRead(analogPin1), ADC_MIN, ADC_MAX, Vmin, Vmax);
-    if(DISPLAY_CURRENT_VALUE) Serial << "\n Current value is:" << " " << currentValue <<"mA";
+    if(isDisplayCurrent) Serial << "\n Current value is:" << " " << currentValue <<"mA";
     if(currentValue >= currentValue_limit){
       double_beep();
       if(overCurrent==false){ //mark as overcurrent and start timing it
@@ -831,6 +848,13 @@ void handleOvercurrentWarning(){
   wakeScreen();
   draw_str("Time Expired.");
   delay(1000);
+}
+
+bool isTimeUp(){
+  
+  time_t t = get_time_stop();
+  if(t > now()) return false;
+  else return true;
 }
 
 void checkRemainingTimeAndPowerUp(){
@@ -879,7 +903,7 @@ void CMD_set_time(){
 
   char *arg;
   unsigned long pctime;
-  const unsigned long DEFAULT_TIME = 1357041600; // Jan 1 2013
+  unsigned long DEFAULT_TIME = 1357041600; // Jan 1 2013
 
   arg = SCmd.next();
   pctime = atol(arg);
@@ -919,11 +943,29 @@ void CMD_test_function(){
   Serial.println("\nRTC Time is: "); Serial.print(hourFormat12(t), DEC); Serial.print(":"); Serial.print(minute(t), DEC); Serial.print(":"); Serial.print(second(t), DEC);
 }
 
+void CMD_time_rtc(){
+  
+  time_t t = RTC.get();
+
+  Serial.print("\nRTC time is: ");
+  Serial.print(dayShortStr(weekday(t)));  Serial.print(" "); Serial.print(monthShortStr(month(t)));  Serial.print(" "); Serial.print(day(t), DEC);  Serial.print(","); Serial.print(year(t), DEC);
+  Serial.print(" - "); Serial.print(hourFormat12(t), DEC); Serial.print(":"); Serial.print(minute(t), DEC); Serial.print(":"); Serial.print(second(t), DEC);
+  if(isAM(t))  Serial.print(" AM");
+  else  Serial.print(" PM");
+}
+
 long get_time_rate(){
   //fetch time rate value from eeprom
   long rate;
   EEPROM.get(TIME_RATE_EEPROM_LOC, rate);
   return rate;
+}
+
+void CMD_display_rate(){
+
+  long rate = get_time_rate();
+  
+  Serial.print("\nRate per tap is: "); Serial.print(rate, DEC);
 }
 
 void save_time_rate_eeprom(long rate){
@@ -957,6 +999,17 @@ void CMD_clear_timeout(){
   powerOff();
 }
 
+void CMD_display_timeout(){
+
+  time_t t = get_time_stop();
+  
+  Serial.print("\nTimeout is on ");
+  Serial.print(dayShortStr(weekday(t)));  Serial.print(" "); Serial.print(monthShortStr(month(t)));  Serial.print(" "); Serial.print(day(t), DEC);  Serial.print(","); Serial.print(year(t), DEC);
+  Serial.print(" - "); Serial.print(hourFormat12(t), DEC); Serial.print(":"); Serial.print(minute(t), DEC); Serial.print(":"); Serial.print(second(t), DEC);
+  if(isAM(t))  Serial.print(" AM");
+  else  Serial.print(" PM");
+}
+
 void CMD_dump_eeprom(){
 
   byte value;
@@ -973,4 +1026,24 @@ void CMD_dump_eeprom(){
   }
   Serial.println();
   Serial.println("--------------------------------------------------------");
+}
+
+void CMD_current(){
+
+  char *arg;
+  int number;
+
+  arg = SCmd.next();
+  number = atoi(arg);
+  
+  if(arg != NULL){
+    if(number == 1){
+      Serial.println("\nDisplaying current");
+      isDisplayCurrent = true;
+    }
+    else if(number == 0){
+      Serial.println("\nCurrent off");
+      isDisplayCurrent = false;
+    }
+  }
 }

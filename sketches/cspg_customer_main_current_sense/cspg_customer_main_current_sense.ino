@@ -543,6 +543,47 @@ void GetTimeInStr(char * vString, int vHour, int vMinute, int vSecond){
   strcpy(vString, tStr1);
 }
 
+void GetTimeInStr2*(char * vString, int vHour, int vMinute, int vSecond){
+  char tStr1[5];
+  char tStr2[5];
+
+  //Display always in double digit
+  if(vHour < 10){
+    itoa(0, tStr1, 10);
+    itoa(vHour, tStr2, 10);
+    strcat(tStr1, tStr2);
+  }
+  else{
+    itoa(vHour, tStr1, 10);
+  }
+  
+  strcat(tStr1, ":");
+  
+  if(vMinute < 10){
+    strcat(tStr1, "0");
+    itoa(vMinute, tStr2, 10);
+    strcat(tStr1, tStr2);
+  }
+  else{
+    itoa(vMinute, tStr2, 10);
+    strcat(tStr1, tStr2);
+  }
+  
+  strcat(tStr1, ":");
+  
+  if(vSecond < 10){
+    strcat(tStr1, "0");
+    itoa(vSecond, tStr2, 10);
+    strcat(tStr1, tStr2);
+  }
+  else{
+    itoa(vSecond, tStr2, 10);
+    strcat(tStr1, tStr2);
+  }
+
+  strcpy(vString, tStr1);
+}
+
 void GetTimeInStr(char * vString, int vHour, int vMinute, int vSecond, bool am_pm){
   char tStr1[5];
   char tStr2[5];

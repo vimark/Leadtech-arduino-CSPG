@@ -70,6 +70,9 @@ char strDate[15]; //Lateral time string variable to display
 char strLine1[9];
 char strLine2[15];
 
+String trString1 = "HELLO";
+String trString2 = "WORLD!";
+
 //current sense pin and variables
 const int analogPin1 = PIN_SENSE_CURRENT;
 time_t timeCurrentCheckNow;
@@ -294,8 +297,11 @@ void OLED_displayRemainingTime(){
   long seconds = ((((t - now()) - minutes*60) - hours * 60 * 60)  - days * 60 * 60 * 24);
 
  convertString(strLine1, days );
- GetTimeInStr(strLine2, hours, minutes, seconds); //need to fix this
- draw_str(strLine1, strLine2);
+ GetTimeInStr2(strLine2, hours, minutes, seconds); //need to fix this
+
+ //test
+ draw_str(trString1, trString2);
+ //draw_str(strLine1, strLine2);
 }
 
 //Utils
@@ -333,6 +339,14 @@ void draw_str(const char *s) {
 }
 
 void draw_str(const char * strLine1, const char * strLine2) {
+  u8g.firstPage();  
+  do {
+    u8g.drawStr( 0, 22, strLine1);
+    u8g.drawStr( 0, 44, strLine2);
+  } while( u8g.nextPage() );
+}
+
+void draw_str(String *strLine1, String *strLine2) {
   u8g.firstPage();  
   do {
     u8g.drawStr( 0, 22, strLine1);
@@ -543,45 +557,58 @@ void GetTimeInStr(char * vString, int vHour, int vMinute, int vSecond){
   strcpy(vString, tStr1);
 }
 
-void GetTimeInStr2*(char * vString, int vHour, int vMinute, int vSecond){
+void GetTimeInStr2(String vString, int vHour, int vMinute, int vSecond){
+  String str = " ";
   char tStr1[5];
   char tStr2[5];
 
   //Display always in double digit
   if(vHour < 10){
-    itoa(0, tStr1, 10);
-    itoa(vHour, tStr2, 10);
-    strcat(tStr1, tStr2);
+    //itoa(0, tStr1, 10);
+    str += '0';
+    //itoa(vHour, tStr2, 10);
+    str += vHour;
+    //strcat(tStr1, tStr2);
   }
   else{
-    itoa(vHour, tStr1, 10);
+    //itoa(vHour, tStr1, 10);
+    str +=vHour;
   }
   
-  strcat(tStr1, ":");
+  //strcat(tStr1, ":");
+  str += ':';
   
   if(vMinute < 10){
-    strcat(tStr1, "0");
-    itoa(vMinute, tStr2, 10);
-    strcat(tStr1, tStr2);
+    //strcat(tStr1, "0");
+    str += '0';
+    //itoa(vMinute, tStr2, 10);
+    //strcat(tStr1, tStr2);
+    str += vMinute;
   }
   else{
-    itoa(vMinute, tStr2, 10);
-    strcat(tStr1, tStr2);
+    //itoa(vMinute, tStr2, 10);
+    //strcat(tStr1, tStr2);
+    str += vMinute;
   }
   
-  strcat(tStr1, ":");
+  //strcat(tStr1, ":");
+  str += ':';
   
   if(vSecond < 10){
-    strcat(tStr1, "0");
-    itoa(vSecond, tStr2, 10);
-    strcat(tStr1, tStr2);
+    //strcat(tStr1, "0");
+    str += '0';
+    //itoa(vSecond, tStr2, 10);
+    //strcat(tStr1, tStr2);
+    str += vSecond;
   }
   else{
-    itoa(vSecond, tStr2, 10);
-    strcat(tStr1, tStr2);
+    //itoa(vSecond, tStr2, 10);
+    //strcat(tStr1, tStr2);
+    str += vSecond;
   }
 
-  strcpy(vString, tStr1);
+  //strcpy(vString, tStr1);
+  vString = str;
 }
 
 void GetTimeInStr(char * vString, int vHour, int vMinute, int vSecond, bool am_pm){
@@ -630,18 +657,25 @@ void GetTimeInStr(char * vString, int vHour, int vMinute, int vSecond, bool am_p
 
 //Format time in a nice string to be displayed
 //Parameters: (string container, weekday, month, date, year)
-void convertString(char * vString, int vDay){
+void convertString(String vString, int vDay){
   char string[30];
   char tStr2[20];
-  strcpy(string, "Time Left:");
+
+  String str = "Time Left:";
+  
+  //strcpy(string, "Time Left:");
   if(vDay>0){
-        itoa(vDay, tStr2, 10);
-  strcat(string, tStr2);  
+    //itoa(vDay, tStr2, 10);
+    //strcat(string, tStr2);
+    str += vDay;
   }else{
-    strcat(string, "0");
+    //strcat(string, "0");
+    str += '0';
   }
-  strcat(string, " days");
-  strcpy(vString, string);
+  //strcat(string, " days");
+  str += " days";
+  //strcpy(vString, string);
+  vString = str;
 }
 
 void GetDateInStr(char * vString, int vWeekday, int vMonth, int vDay, int vYear){

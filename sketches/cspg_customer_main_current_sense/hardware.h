@@ -15,3 +15,6 @@
 #else
 #define PIN_WAKE 2 // client hardware, screen wake pin
 #endif
+
+#define DISPLAY_CLK 21
+#define DISPLAY_SDA 20

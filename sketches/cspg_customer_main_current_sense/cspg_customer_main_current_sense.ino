@@ -70,8 +70,11 @@ char strDate[15]; //Lateral time string variable to display
 char strLine1[9];
 char strLine2[15];
 
-String trString1 = "HELLO";
-String trString2 = "WORLD!";
+//String trString1 = "HELLO";
+//String trString2 = "WORLD!";
+
+const char trString1[] = "HELLO";
+const char trString2[] = "WORLD!";
 
 //current sense pin and variables
 const int analogPin1 = PIN_SENSE_CURRENT;
@@ -107,11 +110,23 @@ enum ramData {TIME_END, TIME_RATE};
 //U8GLIB_SSD1306_128X64 u8g(18, 20, 26, 24);  // SW SPI Com: SCK = 13, MOSI = 11, CS = 10, A0 = 9
 U8GLIB_SH1106_128X64 u8g(U8G_I2C_OPT_NONE);
 
+//Using U8g2 library
+//U8G2_SH1106_128X64_NONAME_1_HW_I2C u8g(U8G2_R0, DISPLAY_CLK, DISPLAY_SDA);
+
+/*
+U8G2_SH1106_128X64_NONAME_1_HW_I2C(rotation, [reset [, clock, data]]) [page buffer, size = 128 bytes]
+U8G2_SH1106_128X64_NONAME_2_HW_I2C(rotation, [reset [, clock, data]]) [page buffer, size = 256 bytes]
+U8G2_SH1106_128X64_NONAME_F_HW_I2C(rotation, [reset [, clock, data]]) [full framebuffer, size = 1024 bytes]
+ */
+
 //buzzer setup
 const int buzzer = 4; //buzzer to arduino pin 4
 
 void checkCurrent();
 void handleOvercurrent();
+void yield(){
+  
+}
 
 void setup()
 {
@@ -125,6 +140,8 @@ void setup()
   Serial.println(VERSION);
   Serial.println(DEV_MESSAGE);
   Serial.println(UID);
+
+  u8g.begin();
   
   //reset OLED display
   digitalWrite(22, LOW);
@@ -133,7 +150,8 @@ void setup()
   
   //u8glib setup
   // assign default color value
-  if ( u8g.getMode() == U8G_MODE_R3G3B2 ) {
+  
+  /*if ( u8g.getMode() == U8G_MODE_R3G3B2 ) {
     u8g.setColorIndex(255);     // white
   }
   else if ( u8g.getMode() == U8G_MODE_GRAY2BIT ) {
@@ -144,7 +162,7 @@ void setup()
   }
   else if ( u8g.getMode() == U8G_MODE_HICOLOR ) {
     u8g.setHiColorByRGB(255,255,255);
-  }
+  }*/
   //set font
   u8g.setFont(u8g_font_unifont);
 
@@ -339,20 +357,27 @@ void draw_str(const char *s) {
 }
 
 void draw_str(const char * strLine1, const char * strLine2) {
-  u8g.firstPage();  
+  u8g.firstPage();
+
+  String str1 = "Hello";
+  String str2 = "World!";
   do {
-    u8g.drawStr( 0, 22, strLine1);
-    u8g.drawStr( 0, 44, strLine2);
+    //u8g.drawStr( 0, 22, strLine1);
+    //u8g.drawStr( 0, 44, strLine2);
+    //u8g.drawStr( 0, 22, "HELLO");
+    //u8g.drawStr( 0, 44, "WORLD!");
+    u8g.drawStr( 0, 22, *str1);
+    u8g.drawStr( 0, 44, *str2);
   } while( u8g.nextPage() );
 }
 
-void draw_str(String *strLine1, String *strLine2) {
+/*void draw_str(String *strLine1, String *strLine2) {
   u8g.firstPage();  
   do {
     u8g.drawStr( 0, 22, strLine1);
     u8g.drawStr( 0, 44, strLine2);
   } while( u8g.nextPage() );
-}
+}*/
 
 void draw_str(const char * strLine1, const char * strLine2, const char * strLine3) {
   u8g.firstPage();  

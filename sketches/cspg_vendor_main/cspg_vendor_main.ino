@@ -446,6 +446,37 @@ void handleReadRFID() {
       }
       if(digitalRead(sw2)==LOW && millis() - time > debounce){ //cancel button
         time = millis(); //debounce, store time
+        while(digitalRead(sw2)==LOW){ //if Cancel and 15d buttons are pressed, delete load
+          if(digitalRead(sw1)==LOW && millis() - time > debounce){
+            time = millis(); //debounce, store time
+            load_int = 0;
+            String y = (String)load_int;
+            byte tempBuffer[y.length()];
+            for(int m=0;m<y.length();m++) tempBuffer[m] = y[m]; //copy string to buffer
+            for(int m=0;m<16;m++) dataBlock[m]=0x00; // initialize dataBlock array
+            for(int m=0;m<y.length();m++) dataBlock[m] =y[m]; // write to dataBlock array
+            status = (MFRC522::StatusCode) mfrc522.MIFARE_Write(blockAddr, dataBlock, 16); // Write to RFID
+            if (status != MFRC522::STATUS_OK) {
+              Serial.print(F("MIFARE_Write() failed: "));
+              Serial.println(mfrc522.GetStatusCodeName(status));
+              draw_str("Card Error.");
+            }else{
+              //write success! dismiss card transaction first before printing, printing takes too long
+              mfrc522.PICC_HaltA();
+              mfrc522.PCD_StopCrypto1();
+          
+              String temp = "Bal.: ";
+              temp += y;
+              String line2 = "Balance Deleted!";
+              char screenBuffer[20]; 
+              char screenBuffer2[20];
+              temp.toCharArray(screenBuffer2, temp.length()+1);
+              line2.toCharArray(screenBuffer,line2.length()+1);
+              draw_str(screenBuffer2, screenBuffer);
+            }
+          }
+        }
+        
         done=0;
       }
       if(digitalRead(sw3)==LOW && millis() - time > debounce){ //load button

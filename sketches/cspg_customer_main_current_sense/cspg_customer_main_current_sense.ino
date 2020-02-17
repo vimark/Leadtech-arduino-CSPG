@@ -56,7 +56,7 @@ DS1302RTC RTC(5, 6, 7); // RTC Module
 //long time_rate= 259200; // time rate per tap in seconds 
 //long time_rate = 10; //10 seconds
 long time_rate = 3600; //1hr
-int load_rate = 10; // amount to deduct from card
+int load_rate = 15; // amount to deduct from card
 int screen_timeout = 30; // Seconds before screen turns off
 time_t screen_now = now(); // Seconds while action.
 int pin_OUTPUT = 3; // Pin for power output
@@ -64,7 +64,7 @@ int pin_OUTPUT = 3; // Pin for power output
 boolean isActive=false; //flag if unit is powered on or is loaded with credits
 boolean screen_sleep = false;
 byte uid[] = {0x54, 0x45, 0x53, 0x54, 0x5f, 0x43, 0x41, 0x52, 0x44, 0x31, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-byte meter_identity[]    = {'C', 'S', 'P', 'G', ' ', 'M', 'E', 'T', 'E', 'R', ' ', '0', '0', '0', '1', 0x00 };
+byte meter_identity[]    = {'C', 'S', 'P', 'G', ' ', 'M', 'E', 'T', 'E', 'R', ' ', '0', '0', '0', '5', 0x00 };
 char strTime[9]; //Lateral time string variable to display
 char strDate[15]; //Lateral time string variable to display
 char strLine1[9];
@@ -315,11 +315,11 @@ void OLED_displayRemainingTime(){
   long seconds = ((((t - now()) - minutes*60) - hours * 60 * 60)  - days * 60 * 60 * 24);
 
  convertString(strLine1, days );
- GetTimeInStr2(strLine2, hours, minutes, seconds); //need to fix this
+ GetTimeInStr(strLine2, hours, minutes, seconds); //need to fix this
 
  //test
- draw_str(trString1, trString2);
- //draw_str(strLine1, strLine2);
+ //draw_str(trString1, trString2);
+ draw_str(strLine1, strLine2);
 }
 
 //Utils
@@ -359,15 +359,15 @@ void draw_str(const char *s) {
 void draw_str(const char * strLine1, const char * strLine2) {
   u8g.firstPage();
 
-  String str1 = "Hello";
-  String str2 = "World!";
+  //String str1 = "Hello";
+  //String str2 = "World!";
   do {
-    //u8g.drawStr( 0, 22, strLine1);
-    //u8g.drawStr( 0, 44, strLine2);
+    u8g.drawStr( 0, 22, strLine1);
+    u8g.drawStr( 0, 44, strLine2);
     //u8g.drawStr( 0, 22, "HELLO");
     //u8g.drawStr( 0, 44, "WORLD!");
-    u8g.drawStr( 0, 22, *str1);
-    u8g.drawStr( 0, 44, *str2);
+    //u8g.drawStr( 0, 22, *str1);
+    //u8g.drawStr( 0, 44, *str2);
   } while( u8g.nextPage() );
 }
 
@@ -409,20 +409,28 @@ void handleReadRFID() {
     if (status != MFRC522::STATUS_OK) {
         Serial.print(F("PCD_Authenticate() failed: "));
         draw_str("RFID Rejected");
+#ifdef DEBUG_MODE
         Serial.println(mfrc522.GetStatusCodeName(status));
+#endif
         return;
     }
 
     //read block 5 for UID verification
+#ifdef DEBUG_MODE
     Serial << "\n[SYS][RFID] Reading Auth Data\n";
+#endif
      status = (MFRC522::StatusCode) mfrc522.MIFARE_Read(5, buffer, &size);
     if (status != MFRC522::STATUS_OK) {
         draw_str("RFID Data Error");
         Serial.print(F("MIFARE_Read() failed: "));
+#ifdef DEBUG_MODE
         Serial.println(mfrc522.GetStatusCodeName(status));
+#endif
     }
     String load_auth = dump_byte_array(buffer, 16);
+#ifdef DEBUG_MODE
     Serial << "\n" <<load_auth <<"\n";
+#endif
     for(int i=0;i<16;i++){
       if(load_auth[i] != uid[i]){
         draw_str("Invalid RFID");
@@ -435,15 +443,21 @@ void handleReadRFID() {
     }
 
     //read block 6, check card association to which meter
+#ifdef DEBUG_MODE
     Serial << "\n[SYS][RFID] Reading Auth Data\n";
+#endif
      status = (MFRC522::StatusCode) mfrc522.MIFARE_Read(6, buffer, &size);
     if (status != MFRC522::STATUS_OK) {
         draw_str("RFID Data Error");
         Serial.print(F("MIFARE_Read() failed: "));
+#ifdef DEBUG_MODE
         Serial.println(mfrc522.GetStatusCodeName(status));
+#endif
     }
     load_auth = dump_byte_array(buffer, 16);
+#ifdef DEBUG_MODE
     Serial << "\n" <<load_auth <<"\n";
+#endif
     for(int i=0;i<16;i++){
       if(load_auth[i] != meter_identity[i]){
         draw_str("Invalid RFID");
@@ -459,7 +473,9 @@ void handleReadRFID() {
     if (status != MFRC522::STATUS_OK) {
         draw_str("RFID Data Error");
         Serial.print(F("MIFARE_Read() failed: "));
+#ifdef DEBUG_MODE
         Serial.println(mfrc522.GetStatusCodeName(status));
+#endif
     }
     beep_buzzer();
     //Below code is for verified cards
@@ -468,15 +484,19 @@ void handleReadRFID() {
     if(load_int - load_rate >= 0){
       int x = load_int - load_rate;
       String y = (String)x;
+#ifdef DEBUG_MODE
       Serial << "\n[SYS][RFID] Current Load: " << load << "\n";
       Serial << "[SYS][RFID] Remaining Load: " << y << "\n";
+#endif
       byte tempBuffer[y.length()];
       for(int m=0;m<y.length();m++){ //copy string to buffer
         tempBuffer[m] = y[m];
       }
+#ifdef DEBUG_MODE
       for(int m=0;m<y.length();m++){ //can erase.
         Serial.println((int)tempBuffer[m]);
       }
+#endif
       for(int m=0;m<16;m++) // initialize dataBlock array
         dataBlock[m]=0x00;
       for(int m=0;m<y.length();m++){ // write to dataBlock array
@@ -485,7 +505,9 @@ void handleReadRFID() {
       status = (MFRC522::StatusCode) mfrc522.MIFARE_Write(blockAddr, dataBlock, 16); // Write to RFID
        if (status != MFRC522::STATUS_OK) {
         Serial.print(F("MIFARE_Write() failed: "));
+#ifdef DEBUG_MODE
         Serial.println(mfrc522.GetStatusCodeName(status));
+#endif
         draw_str("Tap card Error.");
         delay(2000);
       }else{
@@ -507,13 +529,16 @@ void handleReadRFID() {
       char strtemp[5];
       strcpy(strtemp, "Load");
       draw_str("Insufficient", strtemp);
+#ifdef DEBUG_MODE
       Serial << "\n[SYS][RFID] Insufficient Load \n" << "Load Left: " << load_int << "\n";
-      
+#endif
       delay(1000);
     }
 
     mfrc522.PICC_HaltA();
     mfrc522.PCD_StopCrypto1();
+
+    checkingCurrentNow = true; //resume current checking
 }
 
 //Power Handler Section
@@ -682,25 +707,25 @@ void GetTimeInStr(char * vString, int vHour, int vMinute, int vSecond, bool am_p
 
 //Format time in a nice string to be displayed
 //Parameters: (string container, weekday, month, date, year)
-void convertString(String vString, int vDay){
+void convertString(char * vString, int vDay){
   char string[30];
   char tStr2[20];
 
-  String str = "Time Left:";
+  //String str = "Time Left:";
   
-  //strcpy(string, "Time Left:");
+  strcpy(string, "Time Left:");
   if(vDay>0){
-    //itoa(vDay, tStr2, 10);
-    //strcat(string, tStr2);
-    str += vDay;
+    itoa(vDay, tStr2, 10);
+    strcat(string, tStr2);
+    //str += vDay;
   }else{
-    //strcat(string, "0");
-    str += '0';
+    strcat(string, "0");
+    //str += '0';
   }
-  //strcat(string, " days");
-  str += " days";
-  //strcpy(vString, string);
-  vString = str;
+  strcat(string, " days");
+  //str += " days";
+  strcpy(vString, string);
+  //vString = str;
 }
 
 void GetDateInStr(char * vString, int vWeekday, int vMonth, int vDay, int vYear){
@@ -729,19 +754,21 @@ time_t requestSync()
 
 String dump_byte_array(byte *buffer, byte bufferSize) {
   String myString = String((char*)buffer);
+#ifdef DEBUG_MODE
   Serial.println(myString);
+#endif
 //  char * dest;
 //  for (int cnt = 0; cnt < bufferSize; cnt++)
 //  {
 //    // convert byte to its ascii representation
 //    sprintf(&dest[cnt * 2], "%02X", buffer[cnt]);
 //  }
-  
+#ifdef DEBUG_MODE
     for (byte i = 0; i < bufferSize; i++) {
         Serial.print(buffer[i] < 0x10 ? " 0" : " ");
         Serial.print(buffer[i], HEX);
     }
-
+#endif
     return myString;
 }
 

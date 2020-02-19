@@ -1,4 +1,5 @@
 EESchema Schematic File Version 4
+LIBS:under_pcb-cache
 EELAYER 30 0
 EELAYER END
 $Descr A4 11693 8268
@@ -14,37 +15,26 @@ Comment3 ""
 Comment4 ""
 $EndDescr
 $Comp
-L Connector_Generic:Conn_02x18_Odd_Even J5
-U 1 1 5E4CABE2
-P 5200 4850
-F 0 "J5" V 5296 5729 50  0000 L CNN
-F 1 "Conn_02x18_Odd_Even" V 5205 5729 50  0000 L CNN
-F 2 "Connector_PinSocket_2.54mm:PinSocket_2x18_P2.54mm_Vertical" H 5200 4850 50  0001 C CNN
-F 3 "~" H 5200 4850 50  0001 C CNN
-	1    5200 4850
-	0    -1   -1   0   
-$EndComp
-$Comp
 L Connector_Generic:Conn_01x08 J1
 U 1 1 5E4CE9DC
-P 6100 3950
-F 0 "J1" V 6350 3950 50  0000 C CNN
-F 1 "Conn_01x08" V 6250 3950 50  0000 C CNN
-F 2 "Connector_PinSocket_2.54mm:PinSocket_1x08_P2.54mm_Vertical" H 6100 3950 50  0001 C CNN
-F 3 "~" H 6100 3950 50  0001 C CNN
-	1    6100 3950
-	-1   0    0    1   
+P 6100 3850
+F 0 "J1" V 6350 3850 50  0000 C CNN
+F 1 "Conn_01x08" V 6250 3850 50  0000 C CNN
+F 2 "Connector_PinSocket_2.54mm:PinSocket_1x08_P2.54mm_Vertical" H 6100 3850 50  0001 C CNN
+F 3 "~" H 6100 3850 50  0001 C CNN
+	1    6100 3850
+	-1   0    0    -1  
 $EndComp
 $Comp
 L Connector_Generic:Conn_01x08 J2
 U 1 1 5E4CF89D
-P 6100 3000
-F 0 "J2" V 6350 3000 50  0000 C CNN
-F 1 "Conn_01x08" V 6250 3000 50  0000 C CNN
-F 2 "Connector_PinSocket_2.54mm:PinSocket_1x08_P2.54mm_Vertical" H 6100 3000 50  0001 C CNN
-F 3 "~" H 6100 3000 50  0001 C CNN
-	1    6100 3000
-	-1   0    0    1   
+P 6100 2900
+F 0 "J2" V 6350 2900 50  0000 C CNN
+F 1 "Conn_01x08" V 6250 2900 50  0000 C CNN
+F 2 "Connector_PinSocket_2.54mm:PinSocket_1x08_P2.54mm_Vertical" H 6100 2900 50  0001 C CNN
+F 3 "~" H 6100 2900 50  0001 C CNN
+	1    6100 2900
+	-1   0    0    -1  
 $EndComp
 $Comp
 L Connector_Generic:Conn_01x08 J3
@@ -60,29 +50,27 @@ $EndComp
 $Comp
 L Connector_Generic:Conn_01x08 J6
 U 1 1 5E4E81BF
-P 7800 2500
-F 0 "J6" V 8050 2550 50  0000 R CNN
-F 1 "Conn_01x08" V 7950 2750 50  0000 R CNN
-F 2 "Connector_PinSocket_2.54mm:PinSocket_1x08_P2.54mm_Vertical" H 7800 2500 50  0001 C CNN
-F 3 "~" H 7800 2500 50  0001 C CNN
-	1    7800 2500
+P 7800 1850
+F 0 "J6" V 8050 1900 50  0000 R CNN
+F 1 "Conn_01x08" V 7950 2100 50  0000 R CNN
+F 2 "Connector_PinSocket_2.54mm:PinSocket_1x08_P2.54mm_Vertical" H 7800 1850 50  0001 C CNN
+F 3 "~" H 7800 1850 50  0001 C CNN
+	1    7800 1850
 	0    -1   -1   0   
 $EndComp
 $Comp
 L Connector_Generic:Conn_01x04 J7
 U 1 1 5E4E9BB6
-P 5150 1600
-F 0 "J7" V 5114 1312 50  0000 R CNN
-F 1 "Conn_01x04" V 5023 1312 50  0000 R CNN
-F 2 "Connector_PinSocket_2.54mm:PinSocket_1x04_P2.54mm_Vertical" H 5150 1600 50  0001 C CNN
-F 3 "~" H 5150 1600 50  0001 C CNN
-	1    5150 1600
+P 2950 4100
+F 0 "J7" V 2914 3812 50  0000 R CNN
+F 1 "Conn_01x04" V 2823 3812 50  0000 R CNN
+F 2 "Connector_PinSocket_2.54mm:PinSocket_1x04_P2.54mm_Vertical" H 2950 4100 50  0001 C CNN
+F 3 "~" H 2950 4100 50  0001 C CNN
+	1    2950 4100
 	0    -1   -1   0   
 $EndComp
 Wire Wire Line
 	6300 3200 8100 3200
-Wire Wire Line
-	8100 3200 8100 2700
 $Comp
 L power:GND #PWR0101
 U 1 1 5E4EFC96
@@ -95,46 +83,38 @@ F 3 "" H 8000 2900 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	8000 2700 8000 2900
+	8000 2050 8000 2900
 Wire Wire Line
 	6300 3100 7500 3100
 Wire Wire Line
-	7500 3100 7500 2700
-Wire Wire Line
 	6300 2800 7600 2800
-Wire Wire Line
-	7600 2800 7600 2700
 Wire Wire Line
 	6300 3000 7700 3000
 Wire Wire Line
-	7700 3000 7700 2700
-Wire Wire Line
 	6300 2900 7800 2900
-Wire Wire Line
-	7800 2900 7800 2700
 $Comp
 L power:+5V #PWR0102
 U 1 1 5E4F2CA2
-P 8400 2700
-F 0 "#PWR0102" H 8400 2550 50  0001 C CNN
-F 1 "+5V" H 8415 2873 50  0000 C CNN
-F 2 "" H 8400 2700 50  0001 C CNN
-F 3 "" H 8400 2700 50  0001 C CNN
-	1    8400 2700
+P 8350 2050
+F 0 "#PWR0102" H 8350 1900 50  0001 C CNN
+F 1 "+5V" H 8365 2223 50  0000 C CNN
+F 2 "" H 8350 2050 50  0001 C CNN
+F 3 "" H 8350 2050 50  0001 C CNN
+	1    8350 2050
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	8200 2700 8400 2700
+	8200 2050 8350 2050
 $Comp
 L Connector_Generic:Conn_01x06 J4
 U 1 1 5E4D205D
-P 4400 3100
-F 0 "J4" H 4318 2575 50  0000 C CNN
-F 1 "Conn_01x06" H 4318 2666 50  0000 C CNN
-F 2 "Connector_PinSocket_2.54mm:PinSocket_1x06_P2.54mm_Vertical" H 4400 3100 50  0001 C CNN
-F 3 "~" H 4400 3100 50  0001 C CNN
-	1    4400 3100
-	1    0    0    1   
+P 4400 3000
+F 0 "J4" V 4500 3000 50  0000 C CNN
+F 1 "Conn_01x06" V 4600 3000 50  0000 C CNN
+F 2 "Connector_PinSocket_2.54mm:PinSocket_1x06_P2.54mm_Vertical" H 4400 3000 50  0001 C CNN
+F 3 "~" H 4400 3000 50  0001 C CNN
+	1    4400 3000
+	1    0    0    -1  
 $EndComp
 $Comp
 L power:GND #PWR0103
@@ -169,4 +149,251 @@ F 3 "" H 4000 3000 50  0001 C CNN
 $EndComp
 Wire Wire Line
 	4200 3000 4000 3000
+$Comp
+L power:+5V #PWR0105
+U 1 1 5E4D34BE
+P 2650 4300
+F 0 "#PWR0105" H 2650 4150 50  0001 C CNN
+F 1 "+5V" H 2665 4473 50  0000 C CNN
+F 2 "" H 2650 4300 50  0001 C CNN
+F 3 "" H 2650 4300 50  0001 C CNN
+	1    2650 4300
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2850 4300 2850 4400
+Wire Wire Line
+	2850 4400 2650 4400
+Wire Wire Line
+	2650 4400 2650 4300
+$Comp
+L power:GND #PWR0106
+U 1 1 5E4D675C
+P 8200 4650
+F 0 "#PWR0106" H 8200 4400 50  0001 C CNN
+F 1 "GND" H 8205 4477 50  0000 C CNN
+F 2 "" H 8200 4650 50  0001 C CNN
+F 3 "" H 8200 4650 50  0001 C CNN
+	1    8200 4650
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	8300 4650 8200 4650
+Text Notes 8600 4500 0    50   ~ 0
+ENABLE
+Text Notes 8600 4600 0    50   ~ 0
+ADC
+Text Notes 8600 4700 0    50   ~ 0
+GND
+Text Notes 8450 4350 0    50   ~ 0
+VREG BOARD
+Wire Wire Line
+	4200 3550 4200 3450
+Wire Wire Line
+	7550 3450 7550 4550
+Wire Wire Line
+	4200 3450 7550 3450
+Wire Wire Line
+	6300 3950 7650 3950
+Wire Wire Line
+	7650 3950 7650 4450
+$Comp
+L Connector_Generic:Conn_01x05 J9
+U 1 1 5E4EEF9B
+P 8600 3550
+F 0 "J9" H 8550 3250 50  0000 L CNN
+F 1 "Conn_01x05" H 8550 3150 50  0000 L CNN
+F 2 "Connector_PinSocket_2.54mm:PinSocket_1x05_P2.54mm_Vertical" H 8600 3550 50  0001 C CNN
+F 3 "~" H 8600 3550 50  0001 C CNN
+	1    8600 3550
+	1    0    0    -1  
+$EndComp
+Text Notes 7700 1550 0    50   ~ 0
+RFID
+Wire Wire Line
+	7550 4550 8300 4550
+Wire Wire Line
+	7650 4450 8300 4450
+$Comp
+L Connector_Generic:Conn_01x03 J8
+U 1 1 5E4F77A0
+P 8500 4550
+F 0 "J8" H 8450 4250 50  0000 L CNN
+F 1 "Conn_01x03" H 8400 4200 50  0000 L CNN
+F 2 "Connector_PinSocket_2.54mm:PinSocket_1x03_P2.54mm_Vertical" H 8500 4550 50  0001 C CNN
+F 3 "~" H 8500 4550 50  0001 C CNN
+	1    8500 4550
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:+5V #PWR0107
+U 1 1 5E4FA745
+P 8300 3250
+F 0 "#PWR0107" H 8300 3100 50  0001 C CNN
+F 1 "+5V" H 8315 3423 50  0000 C CNN
+F 2 "" H 8300 3250 50  0001 C CNN
+F 3 "" H 8300 3250 50  0001 C CNN
+	1    8300 3250
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	8400 3350 8300 3350
+Wire Wire Line
+	8300 3350 8300 3250
+$Comp
+L power:GND #PWR0108
+U 1 1 5E4FB327
+P 8300 3850
+F 0 "#PWR0108" H 8300 3600 50  0001 C CNN
+F 1 "GND" H 8305 3677 50  0000 C CNN
+F 2 "" H 8300 3850 50  0001 C CNN
+F 3 "" H 8300 3850 50  0001 C CNN
+	1    8300 3850
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	8400 3450 8300 3450
+Wire Wire Line
+	8300 3450 8300 3850
+Wire Wire Line
+	6300 3550 8400 3550
+Wire Wire Line
+	6300 3650 8400 3650
+Wire Wire Line
+	8400 3750 6300 3750
+Text Notes 8600 3200 0    50   ~ 0
+RTC
+Text Notes 8700 3350 0    50   ~ 0
+VCC
+Text Notes 8700 3450 0    50   ~ 0
+GND
+Text Notes 8700 3550 0    50   ~ 0
+CLK
+Text Notes 8700 3650 0    50   ~ 0
+SDA
+Text Notes 8700 3750 0    50   ~ 0
+RST
+Wire Wire Line
+	8100 3200 8100 2050
+Wire Wire Line
+	7800 2900 7800 2050
+Wire Wire Line
+	7700 3000 7700 2050
+Wire Wire Line
+	7600 2800 7600 2050
+Wire Wire Line
+	7500 3100 7500 2050
+$Comp
+L power:GND #PWR?
+U 1 1 5E50711A
+P 2950 4450
+F 0 "#PWR?" H 2950 4200 50  0001 C CNN
+F 1 "GND" H 2955 4277 50  0000 C CNN
+F 2 "" H 2950 4450 50  0001 C CNN
+F 3 "" H 2950 4450 50  0001 C CNN
+	1    2950 4450
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2950 4300 2950 4450
+$Comp
+L Connector_Generic:Conn_02x18_Odd_Even J5
+U 1 1 5E4CABE2
+P 5350 4950
+F 0 "J5" V 5446 5829 50  0000 L CNN
+F 1 "Conn_02x18_Odd_Even" V 5355 5829 50  0000 L CNN
+F 2 "Connector_PinSocket_2.54mm:PinSocket_2x18_P2.54mm_Vertical" H 5350 4950 50  0001 C CNN
+F 3 "~" H 5350 4950 50  0001 C CNN
+	1    5350 4950
+	0    1    -1   0   
+$EndComp
+Wire Wire Line
+	4950 4650 4950 4450
+Wire Wire Line
+	3050 4450 3050 4300
+Wire Wire Line
+	3050 4450 4950 4450
+Wire Wire Line
+	3150 4300 3150 5700
+Wire Wire Line
+	3150 5700 4950 5700
+Wire Wire Line
+	4950 5700 4950 5150
+$Comp
+L power:GND #PWR?
+U 1 1 5E514881
+P 4550 5250
+F 0 "#PWR?" H 4550 5000 50  0001 C CNN
+F 1 "GND" H 4555 5077 50  0000 C CNN
+F 2 "" H 4550 5250 50  0001 C CNN
+F 3 "" H 4550 5250 50  0001 C CNN
+	1    4550 5250
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 5E515CA9
+P 4750 4250
+F 0 "#PWR?" H 4750 4000 50  0001 C CNN
+F 1 "GND" H 4755 4077 50  0000 C CNN
+F 2 "" H 4750 4250 50  0001 C CNN
+F 3 "" H 4750 4250 50  0001 C CNN
+	1    4750 4250
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4750 4250 4550 4250
+Wire Wire Line
+	4550 4250 4550 4650
+Wire Wire Line
+	4550 5250 4550 5150
+$Comp
+L power:+5V #PWR?
+U 1 1 5E5183F3
+P 4100 4950
+F 0 "#PWR?" H 4100 4800 50  0001 C CNN
+F 1 "+5V" H 4115 5123 50  0000 C CNN
+F 2 "" H 4100 4950 50  0001 C CNN
+F 3 "" H 4100 4950 50  0001 C CNN
+	1    4100 4950
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4450 5150 4250 5150
+Wire Wire Line
+	4100 5150 4100 4950
+Wire Wire Line
+	4450 4650 4250 4650
+Wire Wire Line
+	4250 4650 4250 5150
+Connection ~ 4250 5150
+Wire Wire Line
+	4250 5150 4100 5150
+Text Notes 2750 3750 0    50   ~ 0
+OLED DISPLAY
+Text Notes 2850 4000 1    50   ~ 0
+VCC
+Text Notes 2950 4000 1    50   ~ 0
+GND
+Text Notes 3050 4000 1    50   ~ 0
+CLK
+Text Notes 3150 4000 1    50   ~ 0
+SDA
+$Comp
+L power:GND #PWR?
+U 1 1 5E51BD7E
+P 6600 2550
+F 0 "#PWR?" H 6600 2300 50  0001 C CNN
+F 1 "GND" H 6605 2377 50  0000 C CNN
+F 2 "" H 6600 2550 50  0001 C CNN
+F 3 "" H 6600 2550 50  0001 C CNN
+	1    6600 2550
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	6300 2700 6450 2700
+Wire Wire Line
+	6450 2700 6450 2550
+Wire Wire Line
+	6450 2550 6600 2550
 $EndSCHEMATC

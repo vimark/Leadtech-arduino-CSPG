@@ -11002,6 +11002,8 @@ DIN A4, landscape with location and doc. field</description>
 <part name="J1" library="dp_devices.v6" deviceset="CON_HEADER_1X08" device="-PTH"/>
 <part name="J2" library="dp_devices.v6" deviceset="CON_HEADER_1X04" device=""/>
 <part name="J3" library="dp_devices.v6" deviceset="CON_HEADER_1X03" device="-PTH"/>
+<part name="R1" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="R-EU_" device="R0603" package3d_urn="urn:adsk.eagle:package:23555/3" value="10K"/>
+<part name="+5V1" library="dp_devices.v6" deviceset="SUPPLY_+5V" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -11273,6 +11275,11 @@ which USB connector?</text>
 <instance part="J1" gate="J" x="233.68" y="142.24"/>
 <instance part="J2" gate="J" x="487.68" y="134.62"/>
 <instance part="J3" gate="J" x="284.48" y="83.82" rot="MR0"/>
+<instance part="R1" gate="G$1" x="337.82" y="149.86" smashed="yes" rot="R90">
+<attribute name="NAME" x="340.36" y="149.86" size="1.778" layer="95"/>
+<attribute name="VALUE" x="340.36" y="147.32" size="1.778" layer="96"/>
+</instance>
+<instance part="+5V1" gate="SUPPLY" x="337.82" y="157.48" smashed="yes"/>
 </instances>
 <busses>
 </busses>
@@ -11477,6 +11484,12 @@ which USB connector?</text>
 <pinref part="J2" gate="J" pin="1"/>
 <wire x1="487.68" y1="137.16" x2="485.14" y2="137.16" width="0.1524" layer="91"/>
 <label x="485.14" y="137.16" size="1.778" layer="95" align="center-right"/>
+</segment>
+<segment>
+<pinref part="R1" gate="G$1" pin="2"/>
+<pinref part="+5V1" gate="SUPPLY" pin="+5V"/>
+<wire x1="337.82" y1="154.94" x2="337.82" y2="157.48" width="0.1524" layer="91"/>
+<label x="337.82" y="160.02" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="N$8" class="0">
@@ -11937,6 +11950,14 @@ which USB connector?</text>
 <segment>
 <pinref part="J3" gate="J" pin="2"/>
 <wire x1="284.48" y1="83.82" x2="287.02" y2="83.82" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="N$3" class="0">
+<segment>
+<pinref part="U$1" gate="U" pin="!RST"/>
+<wire x1="340.36" y1="142.24" x2="337.82" y2="142.24" width="0.1524" layer="91"/>
+<pinref part="R1" gate="G$1" pin="1"/>
+<wire x1="337.82" y1="142.24" x2="337.82" y2="144.78" width="0.1524" layer="91"/>
 </segment>
 </net>
 </nets>

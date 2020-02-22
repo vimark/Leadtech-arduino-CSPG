@@ -64,7 +64,7 @@ int pin_OUTPUT = 3; // Pin for power output
 boolean isActive=false; //flag if unit is powered on or is loaded with credits
 boolean screen_sleep = false;
 byte uid[] = {0x54, 0x45, 0x53, 0x54, 0x5f, 0x43, 0x41, 0x52, 0x44, 0x31, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-byte meter_identity[]    = {'C', 'S', 'P', 'G', ' ', 'M', 'E', 'T', 'E', 'R', ' ', '0', '0', '0', '5', 0x00 };
+byte meter_identity[]    = {'C', 'S', 'P', 'G', ' ', 'M', 'E', 'T', 'E', 'R', ' ', '0', '0', '0', 'X', 0x00 };
 char strTime[9]; //Lateral time string variable to display
 char strDate[15]; //Lateral time string variable to display
 char strLine1[9];

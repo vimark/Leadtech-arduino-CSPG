@@ -69,6 +69,8 @@ char strTime[9]; //Lateral time string variable to display
 char strDate[15]; //Lateral time string variable to display
 char strLine1[9];
 char strLine2[15];
+const char one[] = "ONE\n";
+const char two[] = "TWO\n";
 
 //String trString1 = "HELLO";
 //String trString2 = "WORLD!";
@@ -1064,17 +1066,16 @@ void CMD_set_time(){
   }  
 }
 
-void 
+void CMD_test_function(){
 
+  char *arg;
+  int i;
 
-
-
-
-
-(){
-
-  time_t t = RTC.get();
-  Serial.println("\nRTC Time is: "); Serial.print(hourFormat12(t), DEC); Serial.print(":"); Serial.print(minute(t), DEC); Serial.print(":"); Serial.print(second(t), DEC);
+  arg = SCmd.next();
+  i = atoi(arg);
+  Serial.println(arg);
+  if(i==1) Serial.println("entered 1");
+  if(i==2) Serial.println("entered 2");
 }
 
 void CMD_time_rtc(){

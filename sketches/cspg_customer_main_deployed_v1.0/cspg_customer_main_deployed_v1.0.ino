@@ -1064,14 +1064,7 @@ void CMD_set_time(){
   }  
 }
 
-void 
-
-
-
-
-
-
-(){
+void CMD_test_function(){
 
   time_t t = RTC.get();
   Serial.println("\nRTC Time is: "); Serial.print(hourFormat12(t), DEC); Serial.print(":"); Serial.print(minute(t), DEC); Serial.print(":"); Serial.print(second(t), DEC);

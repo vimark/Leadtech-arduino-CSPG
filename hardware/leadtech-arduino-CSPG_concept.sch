@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="9.1.3">
+<eagle version="9.4.2">
 <drawing>
 <settings>
 <setting alwaysvectorfont="no"/>
@@ -11303,7 +11303,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <part name="IC1" library="SparkFun-IC-Amplifiers" deviceset="OPAMP-DUAL" device="U" value="OP-AMP"/>
 <part name="Q2" library="dp_devices.v6" deviceset="TRANSISTOR_FET_TSM2301CX" device=""/>
 <part name="+5V3" library="dp_devices.v6" deviceset="SUPPLY_+5V" device=""/>
-<part name="R11" library="dp_devices.v6" deviceset="RESISTOR" device="-0603" value="330R"/>
+<part name="R11" library="dp_devices.v6" deviceset="RESISTOR" device="-0603" value="10K"/>
 <part name="VREG2" library="dp_devices.v6" deviceset="VREG_3PINS" device="-SOT-223" value="3.3V"/>
 <part name="GND1" library="dp_devices.v6" deviceset="SUPPLY_GND" device=""/>
 <part name="GND3" library="dp_devices.v6" deviceset="SUPPLY_GND" device=""/>
@@ -11311,6 +11311,12 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <part name="+5V18" library="dp_devices.v6" deviceset="SUPPLY_+5V" device=""/>
 <part name="+5V19" library="dp_devices.v6" deviceset="SUPPLY_+5V" device=""/>
 <part name="+5V20" library="dp_devices.v6" deviceset="SUPPLY_+5V" device=""/>
+<part name="C1" library="dp_devices.v6" deviceset="CAPACITOR_POL" device="-CASE_B" value="10uF"/>
+<part name="GND4" library="dp_devices.v6" deviceset="SUPPLY_GND" device=""/>
+<part name="R12" library="dp_devices.v6" deviceset="RESISTOR" device="-0603" value="10K"/>
+<part name="GND5" library="dp_devices.v6" deviceset="SUPPLY_GND" device=""/>
+<part name="+5V21" library="dp_devices.v6" deviceset="SUPPLY_+5V" device=""/>
+<part name="+5V22" library="dp_devices.v6" deviceset="SUPPLY_+5V" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -11458,8 +11464,8 @@ which USB connector?</text>
 <attribute name="VALUE" x="38.1" y="160.02" size="1.778" layer="96"/>
 </instance>
 <instance part="C8" gate="C" x="48.26" y="154.94" smashed="yes">
-<attribute name="NAME" x="48.26" y="162.56" size="1.778" layer="95"/>
-<attribute name="VALUE" x="48.26" y="160.02" size="1.778" layer="96"/>
+<attribute name="NAME" x="50.8" y="152.4" size="1.778" layer="95"/>
+<attribute name="VALUE" x="50.8" y="149.86" size="1.778" layer="96"/>
 </instance>
 <instance part="VREG1" gate="VREG" x="66.04" y="157.48" smashed="yes">
 <attribute name="NAME" x="58.42" y="163.322" size="1.778" layer="95"/>
@@ -11579,30 +11585,63 @@ which USB connector?</text>
 <attribute name="VALUE" x="454.66" y="137.16" size="1.778" layer="96"/>
 </instance>
 <instance part="+5V17" gate="SUPPLY" x="464.82" y="147.32" smashed="yes"/>
-<instance part="J1" gate="J" x="233.68" y="142.24"/>
-<instance part="J2" gate="J" x="487.68" y="134.62"/>
-<instance part="J3" gate="J" x="284.48" y="83.82" rot="MR0"/>
+<instance part="J1" gate="J" x="233.68" y="142.24" smashed="yes">
+<attribute name="NAME" x="232.41" y="153.035" size="1.778" layer="95"/>
+</instance>
+<instance part="J2" gate="J" x="487.68" y="134.62" smashed="yes">
+<attribute name="NAME" x="486.41" y="140.97" size="1.778" layer="95"/>
+</instance>
+<instance part="J3" gate="J" x="284.48" y="83.82" smashed="yes" rot="MR0">
+<attribute name="NAME" x="285.75" y="90.17" size="1.778" layer="95" rot="MR0"/>
+</instance>
 <instance part="R1" gate="G$1" x="337.82" y="149.86" smashed="yes" rot="R90">
 <attribute name="NAME" x="340.36" y="149.86" size="1.778" layer="95"/>
 <attribute name="VALUE" x="340.36" y="147.32" size="1.778" layer="96"/>
 </instance>
 <instance part="+5V1" gate="SUPPLY" x="337.82" y="157.48" smashed="yes"/>
-<instance part="IC1" gate="G1" x="185.42" y="226.06"/>
-<instance part="Q2" gate="Q" x="208.28" y="231.14" rot="R90"/>
-<instance part="+5V3" gate="SUPPLY" x="200.66" y="238.76" smashed="yes"/>
-<instance part="R11" gate="R" x="154.94" y="238.76" smashed="yes" rot="R90">
-<attribute name="NAME" x="149.86" y="236.22" size="1.778" layer="95" font="vector" rot="R90"/>
-<attribute name="VALUE" x="152.4" y="236.22" size="1.778" layer="96" font="vector" rot="R90"/>
+<instance part="IC1" gate="G1" x="185.42" y="226.06" smashed="yes">
+<attribute name="NAME" x="180.34" y="231.902" size="1.778" layer="95" font="vector"/>
+<attribute name="VALUE" x="180.34" y="218.44" size="1.778" layer="95" font="vector"/>
 </instance>
-<instance part="VREG2" gate="VREG" x="238.76" y="233.68"/>
+<instance part="Q2" gate="Q" x="208.28" y="231.14" smashed="yes" rot="R90">
+<attribute name="VALUE" x="208.28" y="219.71" size="1.778" layer="96" rot="R90"/>
+<attribute name="NAME" x="205.74" y="219.71" size="1.778" layer="95" rot="R90"/>
+</instance>
+<instance part="+5V3" gate="SUPPLY" x="200.66" y="238.76" smashed="yes"/>
+<instance part="R11" gate="R" x="165.1" y="231.14" smashed="yes" rot="R90">
+<attribute name="NAME" x="160.02" y="228.6" size="1.778" layer="95" font="vector" rot="R90"/>
+<attribute name="VALUE" x="162.56" y="228.6" size="1.778" layer="96" font="vector" rot="R90"/>
+</instance>
+<instance part="VREG2" gate="VREG" x="238.76" y="233.68" smashed="yes">
+<attribute name="NAME" x="231.14" y="239.522" size="1.778" layer="95"/>
+<attribute name="VALUE" x="231.14" y="237.236" size="1.778" layer="96"/>
+</instance>
 <instance part="GND1" gate="G$1" x="238.76" y="223.52" smashed="yes"/>
-<instance part="IC1" gate="G3" x="182.88" y="254"/>
-<instance part="IC1" gate="G2" x="162.56" y="266.7"/>
+<instance part="IC1" gate="G3" x="182.88" y="254" smashed="yes">
+<attribute name="NAME" x="179.578" y="248.92" size="1.778" layer="95" font="vector" rot="R90"/>
+<attribute name="VALUE" x="187.96" y="248.92" size="1.778" layer="95" font="vector" rot="R90"/>
+</instance>
+<instance part="IC1" gate="G2" x="162.56" y="266.7" smashed="yes">
+<attribute name="NAME" x="157.48" y="272.542" size="1.778" layer="95" font="vector"/>
+<attribute name="VALUE" x="157.48" y="259.08" size="1.778" layer="95" font="vector"/>
+</instance>
 <instance part="GND3" gate="G$1" x="182.88" y="243.84" smashed="yes"/>
 <instance part="+5V5" gate="SUPPLY" x="182.88" y="264.16" smashed="yes"/>
 <instance part="+5V18" gate="SUPPLY" x="220.98" y="238.76" smashed="yes"/>
 <instance part="+5V19" gate="SUPPLY" x="254" y="238.76" smashed="yes"/>
 <instance part="+5V20" gate="SUPPLY" x="172.72" y="231.14" smashed="yes"/>
+<instance part="C1" gate="C" x="254" y="231.14" smashed="yes">
+<attribute name="NAME" x="256.54" y="231.14" size="1.778" layer="95"/>
+<attribute name="VALUE" x="256.54" y="228.6" size="1.778" layer="96"/>
+</instance>
+<instance part="GND4" gate="G$1" x="254" y="223.52" smashed="yes"/>
+<instance part="R12" gate="R" x="165.1" y="215.9" smashed="yes" rot="R90">
+<attribute name="NAME" x="160.02" y="213.36" size="1.778" layer="95" font="vector" rot="R90"/>
+<attribute name="VALUE" x="162.56" y="213.36" size="1.778" layer="96" font="vector" rot="R90"/>
+</instance>
+<instance part="GND5" gate="G$1" x="165.1" y="208.28" smashed="yes"/>
+<instance part="+5V21" gate="SUPPLY" x="48.26" y="162.56" smashed="yes"/>
+<instance part="+5V22" gate="SUPPLY" x="165.1" y="238.76" smashed="yes"/>
 </instances>
 <busses>
 </busses>
@@ -11745,6 +11784,14 @@ which USB connector?</text>
 <segment>
 <pinref part="IC1" gate="G3" pin="P$V-"/>
 <pinref part="GND3" gate="G$1" pin="GND"/>
+</segment>
+<segment>
+<pinref part="C1" gate="C" pin="-"/>
+<pinref part="GND4" gate="G$1" pin="GND"/>
+</segment>
+<segment>
+<pinref part="R12" gate="R" pin="1"/>
+<pinref part="GND5" gate="G$1" pin="GND"/>
 </segment>
 </net>
 <net name="+5V" class="0">
@@ -12016,16 +12063,6 @@ which USB connector?</text>
 <wire x1="33.02" y1="157.48" x2="38.1" y2="157.48" width="0.1524" layer="91"/>
 </segment>
 </net>
-<net name="N$20" class="0">
-<segment>
-<pinref part="D1" gate="1" pin="C"/>
-<pinref part="C8" gate="C" pin="+"/>
-<wire x1="43.18" y1="157.48" x2="48.26" y2="157.48" width="0.1524" layer="91"/>
-<pinref part="VREG1" gate="VREG" pin="VIN"/>
-<wire x1="48.26" y1="157.48" x2="55.88" y2="157.48" width="0.1524" layer="91"/>
-<junction x="48.26" y="157.48"/>
-</segment>
-</net>
 <net name="N$21" class="0">
 <segment>
 <pinref part="LED2" gate="LED" pin="C"/>
@@ -12121,6 +12158,8 @@ which USB connector?</text>
 <pinref part="+5V19" gate="SUPPLY" pin="+5V"/>
 <wire x1="254" y1="236.22" x2="254" y2="238.76" width="0.1524" layer="91"/>
 <label x="254" y="241.3" size="1.778" layer="95"/>
+<pinref part="C1" gate="C" pin="+"/>
+<junction x="254" y="233.68"/>
 </segment>
 <segment>
 <pinref part="IC1" gate="G1" pin="-IN"/>
@@ -12335,6 +12374,36 @@ which USB connector?</text>
 <pinref part="Q2" gate="Q" pin="G"/>
 <wire x1="193.04" y1="226.06" x2="210.82" y2="226.06" width="0.1524" layer="91"/>
 <wire x1="210.82" y1="226.06" x2="210.82" y2="228.6" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="N$5" class="0">
+<segment>
+<pinref part="IC1" gate="G1" pin="+IN"/>
+<wire x1="177.8" y1="223.52" x2="165.1" y2="223.52" width="0.1524" layer="91"/>
+<pinref part="R11" gate="R" pin="1"/>
+<wire x1="165.1" y1="223.52" x2="165.1" y2="226.06" width="0.1524" layer="91"/>
+<pinref part="R12" gate="R" pin="2"/>
+<wire x1="165.1" y1="220.98" x2="165.1" y2="223.52" width="0.1524" layer="91"/>
+<junction x="165.1" y="223.52"/>
+</segment>
+</net>
+<net name="VIN" class="0">
+<segment>
+<pinref part="D1" gate="1" pin="C"/>
+<pinref part="C8" gate="C" pin="+"/>
+<wire x1="43.18" y1="157.48" x2="48.26" y2="157.48" width="0.1524" layer="91"/>
+<pinref part="VREG1" gate="VREG" pin="VIN"/>
+<wire x1="48.26" y1="157.48" x2="55.88" y2="157.48" width="0.1524" layer="91"/>
+<junction x="48.26" y="157.48"/>
+<pinref part="+5V21" gate="SUPPLY" pin="+5V"/>
+<wire x1="48.26" y1="157.48" x2="48.26" y2="162.56" width="0.1524" layer="91"/>
+<label x="48.26" y="165.1" size="1.778" layer="95"/>
+</segment>
+<segment>
+<pinref part="R11" gate="R" pin="2"/>
+<wire x1="165.1" y1="236.22" x2="165.1" y2="238.76" width="0.1524" layer="91"/>
+<pinref part="+5V22" gate="SUPPLY" pin="+5V"/>
+<label x="165.1" y="241.3" size="1.778" layer="95"/>
 </segment>
 </net>
 </nets>

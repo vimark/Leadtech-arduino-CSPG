@@ -41,6 +41,7 @@
 //EEPROM locations
 #define TIME_STOP_EEPROM_LOC 0
 #define TIME_RATE_EEPROM_LOC 16
+#define METER_ID_LOC 24 //16 bytes wide
 
 SerialCommand SCmd; //serial command instance
 
@@ -64,13 +65,17 @@ int pin_OUTPUT = 3; // Pin for power output
 boolean isActive=false; //flag if unit is powered on or is loaded with credits
 boolean screen_sleep = false;
 byte uid[] = {0x54, 0x45, 0x53, 0x54, 0x5f, 0x43, 0x41, 0x52, 0x44, 0x31, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-byte meter_identity[]    = {'C', 'S', 'P', 'G', ' ', 'M', 'E', 'T', 'E', 'R', ' ', '0', '0', '0', '9', 0x00 };
+byte meter_identity[]    = {'C', 'S', 'P', 'G', ' ', 'M', 'E', 'T', 'E', 'R', ' ', '0', '0', '0', 'X', 0x00 };
 char strTime[9]; //Lateral time string variable to display
 char strDate[15]; //Lateral time string variable to display
 char strLine1[9];
 char strLine2[15];
 const char one[] = "ONE\n";
 const char two[] = "TWO\n";
+
+struct meter{
+  char id[16];
+};
 
 //String trString1 = "HELLO";
 //String trString2 = "WORLD!";
@@ -211,15 +216,14 @@ void setup()
 
   //serial commands
   SCmd.addCommand("DUMP_CMOS", CMD_dump_cmos);
-  SCmd.addCommand("SET_RATE", CMD_set_rate);
-  SCmd.addCommand("RATE", CMD_display_rate);
+  SCmd.addCommand("RATE", CMD_display_rate); //RATE, RATE SET
   SCmd.addCommand("TIME", CMD_set_time);
   SCmd.addCommand("TIME_RTC", CMD_time_rtc);
-  SCmd.addCommand("TIMEOUT", CMD_display_timeout);
+  SCmd.addCommand("TIMEOUT", CMD_display_timeout); //TIMEOUT, TIMEOUT CLEAR
   SCmd.addCommand("TEST", CMD_test_function); //for test only
-  SCmd.addCommand("CLEAR_TIMEOUT", CMD_clear_timeout);
   SCmd.addCommand("DUMP_EEPROM", CMD_dump_eeprom);
   SCmd.addCommand("CURRENT", CMD_current);
+  SCmd.addCommand("ID", CMD_identity);
   SCmd.addDefaultHandler(unrecognized);
 
 }
@@ -759,12 +763,7 @@ String dump_byte_array(byte *buffer, byte bufferSize) {
 #ifdef DEBUG_MODE
   Serial.println(myString);
 #endif
-//  char * dest;
-//  for (int cnt = 0; cnt < bufferSize; cnt++)
-//  {
-//    // convert byte to its ascii representation
-//    sprintf(&dest[cnt * 2], "%02X", buffer[cnt]);
-//  }
+
 #ifdef DEBUG_MODE
     for (byte i = 0; i < bufferSize; i++) {
         Serial.print(buffer[i] < 0x10 ? " 0" : " ");
@@ -1010,24 +1009,6 @@ void CMD_dump_cmos(){
   bufferDump("Dumping RTC RAM"); 
 }
 
-void CMD_set_rate(){
-
-  char *arg;
-  long lBuffer;
-
-  arg = SCmd.next();
-  if(arg != NULL){
-    lBuffer = atol(arg); //convert string to long int
-    time_rate = lBuffer;
-    Serial.print("\nTime rate changed to: ");
-    Serial.println(lBuffer);
-
-    Serial.print("\nSaving new time rate to CMOS");
-    writeToRtcRam(time_rate, TIME_RATE);
-    save_time_rate_eeprom(lBuffer);
-  }
-}
-
 void CMD_set_time(){
 
   char *arg;
@@ -1069,13 +1050,11 @@ void CMD_set_time(){
 void CMD_test_function(){
 
   char *arg;
-  int i;
-
   arg = SCmd.next();
-  i = atoi(arg);
-  Serial.println(arg);
-  if(i==1) Serial.println("entered 1");
-  if(i==2) Serial.println("entered 2");
+
+  if(strcmp(arg, "ONE")==0) Serial.println("entered 1");
+  else if(strcmp(arg, "TWO")==0) Serial.println("entered 2");
+  else Serial.println("wrong input");
 }
 
 void CMD_time_rtc(){
@@ -1099,8 +1078,24 @@ long get_time_rate(){
 void CMD_display_rate(){
 
   long rate = get_time_rate();
+  long lBuffer;
+  char *arg;
   
-  Serial.print("\nRate per tap is: "); Serial.print(rate, DEC);
+  arg = SCmd.next();
+
+  if(strcmp(arg, NULL)==0){
+    Serial.print("\nRate per tap is: "); Serial.print(rate, DEC);
+  }
+  else if(strcmp(arg, "SET")==0){
+    arg = SCmd.next();
+    if(arg != NULL){
+      lBuffer = atol(arg); //convert string to long int
+      time_rate = lBuffer;
+      Serial.print("\nTime rate changed to: "); Serial.println(lBuffer);
+      save_time_rate_eeprom(lBuffer);
+    }
+  }
+  else Serial.println("\nwrong input");
 }
 
 void save_time_rate_eeprom(long rate){
@@ -1112,6 +1107,10 @@ void save_time_rate_eeprom(long rate){
 void save_time_stop_eeprom(time_t t){
   
   EEPROM.put(TIME_STOP_EEPROM_LOC, t);
+}
+
+void save_id_eeprom(String id){
+  EEPROM.put(METER_ID_LOC, id);
 }
 
 time_t get_time_stop(){
@@ -1126,23 +1125,28 @@ void unrecognized(){
   Serial.println("\nInvalid command!");
 }
 
-void CMD_clear_timeout(){
-
-  Serial.println("\nClearing time out entry and powering off");
-  
-  save_time_stop_eeprom(0);
-  powerOff();
-}
-
 void CMD_display_timeout(){
 
+  char *arg;
   time_t t = get_time_stop();
   
-  Serial.print("\nTimeout is on ");
-  Serial.print(dayShortStr(weekday(t)));  Serial.print(" "); Serial.print(monthShortStr(month(t)));  Serial.print(" "); Serial.print(day(t), DEC);  Serial.print(","); Serial.print(year(t), DEC);
-  Serial.print(" - "); Serial.print(hourFormat12(t), DEC); Serial.print(":"); Serial.print(minute(t), DEC); Serial.print(":"); Serial.print(second(t), DEC);
-  if(isAM(t))  Serial.print(" AM");
-  else  Serial.print(" PM");
+  arg = SCmd.next();
+
+  if(strcmp(arg, NULL)==0){
+    
+    Serial.print("\nTimeout is on ");
+    Serial.print(dayShortStr(weekday(t)));  Serial.print(" "); Serial.print(monthShortStr(month(t)));  Serial.print(" "); Serial.print(day(t), DEC);  Serial.print(","); Serial.print(year(t), DEC);
+    Serial.print(" - "); Serial.print(hourFormat12(t), DEC); Serial.print(":"); Serial.print(minute(t), DEC); Serial.print(":"); Serial.print(second(t), DEC);
+    if(isAM(t))  Serial.print(" AM");
+    else  Serial.print(" PM");
+  }
+  else if(strcmp(arg, "CLEAR")==0){
+
+    Serial.println("\nClearing time out entry and powering off");
+    save_time_stop_eeprom(0);
+    powerOff();
+  }
+  else Serial.println("\nwrong input");
 }
 
 void CMD_dump_eeprom(){
@@ -1181,4 +1185,28 @@ void CMD_current(){
       isDisplayCurrent = false;
     }
   }
+}
+
+String get_id(){
+
+  meter str;
+  EEPROM.get(METER_ID_LOC, str);
+  return str.id;
+}
+
+void CMD_identity(){
+  
+  String str = dump_byte_array(meter_identity, 16);char *arg;
+  
+  arg = SCmd.next();
+
+  if(strcmp(arg, NULL)==0){
+    
+    Serial.print("\nMeter ID: "); Serial.print(get_id());
+  }
+  else if(strcmp(arg, "CLEAR")==0){
+
+    Serial.println("\nClearing time out entry and powering off");
+  }
+  else Serial.println("\nwrong input");
 }

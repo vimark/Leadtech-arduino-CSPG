@@ -1194,6 +1194,11 @@ String get_id(){
   return str.id;
 }
 
+void set_id(meter str){
+
+  EEPROM.put(METER_ID_LOC, str);
+}
+
 void CMD_identity(){
   
   String str = dump_byte_array(meter_identity, 16);char *arg;
@@ -1204,9 +1209,13 @@ void CMD_identity(){
     
     Serial.print("\nMeter ID: "); Serial.print(get_id());
   }
-  else if(strcmp(arg, "CLEAR")==0){
+  else if(strcmp(arg, "SET")==0){
 
-    Serial.println("\nClearing time out entry and powering off");
+    meter str;
+    str.id = "CSPG METER 0101";
+    //str.id = SCmd.next();
+    set_id(str);
+    Serial.print("\nSet ID to: "); Serial.print(get_id());
   }
   else Serial.println("\nwrong input");
 }

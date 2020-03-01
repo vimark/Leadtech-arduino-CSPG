@@ -11317,6 +11317,10 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <part name="GND5" library="dp_devices.v6" deviceset="SUPPLY_GND" device=""/>
 <part name="+5V21" library="dp_devices.v6" deviceset="SUPPLY_+5V" device=""/>
 <part name="+5V22" library="dp_devices.v6" deviceset="SUPPLY_+5V" device=""/>
+<part name="R13" library="dp_devices.v6" deviceset="RESISTOR" device="-0603" value="10K"/>
+<part name="R14" library="dp_devices.v6" deviceset="RESISTOR" device="-0603" value="10K"/>
+<part name="GND6" library="dp_devices.v6" deviceset="SUPPLY_GND" device=""/>
+<part name="+5V23" library="dp_devices.v6" deviceset="SUPPLY_+5V" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -11369,6 +11373,10 @@ which USB connector?</text>
 <text x="359.664" y="119.126" size="1.778" layer="98" align="center">7</text>
 <text x="359.664" y="116.586" size="1.778" layer="98" align="center">6</text>
 <text x="350.52" y="91.44" size="1.778" layer="98" align="center">5</text>
+<text x="226.06" y="215.9" size="1.778" layer="98" align="center">If VIN is present, VUSB is cut and
+system is powered by VIN,
+otherwise via VUSB</text>
+<text x="289.56" y="185.42" size="1.778" layer="98" align="center">Unused</text>
 </plain>
 <instances>
 <instance part="GND8" gate="G$1" x="142.24" y="7.62" smashed="yes"/>
@@ -11605,7 +11613,7 @@ which USB connector?</text>
 </instance>
 <instance part="Q2" gate="Q" x="208.28" y="231.14" smashed="yes" rot="R90">
 <attribute name="VALUE" x="208.28" y="219.71" size="1.778" layer="96" rot="R90"/>
-<attribute name="NAME" x="205.74" y="219.71" size="1.778" layer="95" rot="R90"/>
+<attribute name="NAME" x="210.82" y="236.22" size="1.778" layer="95"/>
 </instance>
 <instance part="+5V3" gate="SUPPLY" x="200.66" y="238.76" smashed="yes"/>
 <instance part="R11" gate="R" x="165.1" y="231.14" smashed="yes" rot="R90">
@@ -11621,9 +11629,9 @@ which USB connector?</text>
 <attribute name="NAME" x="179.578" y="248.92" size="1.778" layer="95" font="vector" rot="R90"/>
 <attribute name="VALUE" x="187.96" y="248.92" size="1.778" layer="95" font="vector" rot="R90"/>
 </instance>
-<instance part="IC1" gate="G2" x="162.56" y="266.7" smashed="yes">
-<attribute name="NAME" x="157.48" y="272.542" size="1.778" layer="95" font="vector"/>
-<attribute name="VALUE" x="157.48" y="259.08" size="1.778" layer="95" font="vector"/>
+<instance part="IC1" gate="G2" x="294.64" y="200.66" smashed="yes" rot="MR180">
+<attribute name="NAME" x="289.56" y="194.818" size="1.778" layer="95" font="vector" rot="MR180"/>
+<attribute name="VALUE" x="289.56" y="208.28" size="1.778" layer="95" font="vector" rot="MR180"/>
 </instance>
 <instance part="GND3" gate="G$1" x="182.88" y="243.84" smashed="yes"/>
 <instance part="+5V5" gate="SUPPLY" x="182.88" y="264.16" smashed="yes"/>
@@ -11642,6 +11650,16 @@ which USB connector?</text>
 <instance part="GND5" gate="G$1" x="165.1" y="208.28" smashed="yes"/>
 <instance part="+5V21" gate="SUPPLY" x="48.26" y="162.56" smashed="yes"/>
 <instance part="+5V22" gate="SUPPLY" x="165.1" y="238.76" smashed="yes"/>
+<instance part="R13" gate="R" x="281.94" y="208.28" smashed="yes" rot="R90">
+<attribute name="NAME" x="276.86" y="205.74" size="1.778" layer="95" font="vector" rot="R90"/>
+<attribute name="VALUE" x="279.4" y="205.74" size="1.778" layer="96" font="vector" rot="R90"/>
+</instance>
+<instance part="R14" gate="R" x="281.94" y="198.12" smashed="yes" rot="R90">
+<attribute name="NAME" x="276.86" y="195.58" size="1.778" layer="95" font="vector" rot="R90"/>
+<attribute name="VALUE" x="279.4" y="195.58" size="1.778" layer="96" font="vector" rot="R90"/>
+</instance>
+<instance part="GND6" gate="G$1" x="281.94" y="190.5" smashed="yes"/>
+<instance part="+5V23" gate="SUPPLY" x="281.94" y="215.9" smashed="yes"/>
 </instances>
 <busses>
 </busses>
@@ -11793,6 +11811,10 @@ which USB connector?</text>
 <pinref part="R12" gate="R" pin="1"/>
 <pinref part="GND5" gate="G$1" pin="GND"/>
 </segment>
+<segment>
+<pinref part="R14" gate="R" pin="1"/>
+<pinref part="GND6" gate="G$1" pin="GND"/>
+</segment>
 </net>
 <net name="+5V" class="0">
 <segment>
@@ -11884,6 +11906,12 @@ which USB connector?</text>
 <junction x="220.98" y="233.68"/>
 <pinref part="+5V18" gate="SUPPLY" pin="+5V"/>
 <label x="220.98" y="241.3" size="1.778" layer="95"/>
+</segment>
+<segment>
+<pinref part="R13" gate="R" pin="2"/>
+<pinref part="+5V23" gate="SUPPLY" pin="+5V"/>
+<wire x1="281.94" y1="215.9" x2="281.94" y2="213.36" width="0.1524" layer="91"/>
+<label x="281.94" y="218.44" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="N$8" class="0">
@@ -12404,6 +12432,26 @@ which USB connector?</text>
 <wire x1="165.1" y1="236.22" x2="165.1" y2="238.76" width="0.1524" layer="91"/>
 <pinref part="+5V22" gate="SUPPLY" pin="+5V"/>
 <label x="165.1" y="241.3" size="1.778" layer="95"/>
+</segment>
+</net>
+<net name="N$6" class="0">
+<segment>
+<pinref part="IC1" gate="G2" pin="-IN"/>
+<wire x1="287.02" y1="198.12" x2="287.02" y2="190.5" width="0.1524" layer="91"/>
+<pinref part="IC1" gate="G2" pin="OUT"/>
+<wire x1="287.02" y1="190.5" x2="302.26" y2="190.5" width="0.1524" layer="91"/>
+<wire x1="302.26" y1="190.5" x2="302.26" y2="200.66" width="0.1524" layer="91"/>
+<wire x1="302.26" y1="200.66" x2="304.8" y2="200.66" width="0.1524" layer="91"/>
+<junction x="302.26" y="200.66"/>
+</segment>
+</net>
+<net name="N$9" class="0">
+<segment>
+<pinref part="IC1" gate="G2" pin="+IN"/>
+<wire x1="287.02" y1="203.2" x2="281.94" y2="203.2" width="0.1524" layer="91"/>
+<pinref part="R13" gate="R" pin="1"/>
+<pinref part="R14" gate="R" pin="2"/>
+<junction x="281.94" y="203.2"/>
 </segment>
 </net>
 </nets>

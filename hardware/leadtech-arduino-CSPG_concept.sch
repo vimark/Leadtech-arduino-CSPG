@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="9.4.2">
+<eagle version="9.1.3">
 <drawing>
 <settings>
 <setting alwaysvectorfont="no"/>
@@ -11232,6 +11232,8 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <part name="GND32" library="dp_devices.v6" deviceset="SUPPLY_GND" device=""/>
 <part name="C16" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="C-EU" device="C0603" package3d_urn="urn:adsk.eagle:package:23616/2" value="0.1uF"/>
 <part name="U5" library="trosh_devices.eagle.v9" deviceset="VREG-RT9163" device="" value="VREG-RT9163-3.3V"/>
+<part name="J5" library="dp_devices.v6" deviceset="CON_HEADER_1X02" device="-PTH"/>
+<part name="GND33" library="dp_devices.v6" deviceset="SUPPLY_GND" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -11585,6 +11587,10 @@ part no. C27543</text>
 <attribute name="NAME" x="231.14" y="239.522" size="1.778" layer="95"/>
 <attribute name="VALUE" x="231.14" y="237.236" size="1.778" layer="96"/>
 </instance>
+<instance part="J5" gate="J" x="284.48" y="106.68" smashed="yes" rot="MR0">
+<attribute name="NAME" x="285.75" y="110.49" size="1.778" layer="95" rot="MR0"/>
+</instance>
+<instance part="GND33" gate="G$1" x="287.02" y="99.06" smashed="yes"/>
 </instances>
 <busses>
 </busses>
@@ -11760,9 +11766,14 @@ part no. C27543</text>
 </segment>
 <segment>
 <pinref part="U5" gate="U" pin="GND"/>
-<pinref part="U5" gate="U" pin="GND"/>
 <pinref part="GND1" gate="G$1" pin="GND"/>
 <junction x="238.76" y="226.06"/>
+</segment>
+<segment>
+<pinref part="J5" gate="J" pin="2"/>
+<pinref part="GND33" gate="G$1" pin="GND"/>
+<wire x1="284.48" y1="104.14" x2="287.02" y2="104.14" width="0.1524" layer="91"/>
+<wire x1="287.02" y1="104.14" x2="287.02" y2="101.6" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="+5V" class="0">
@@ -12277,6 +12288,11 @@ part no. C27543</text>
 <wire x1="322.58" y1="93.98" x2="322.58" y2="96.52" width="0.1524" layer="91"/>
 <wire x1="322.58" y1="93.98" x2="320.04" y2="93.98" width="0.1524" layer="91"/>
 <junction x="322.58" y="93.98"/>
+</segment>
+<segment>
+<pinref part="J5" gate="J" pin="1"/>
+<wire x1="284.48" y1="106.68" x2="287.02" y2="106.68" width="0.1524" layer="91"/>
+<label x="287.02" y="106.68" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="OUT1" class="0">

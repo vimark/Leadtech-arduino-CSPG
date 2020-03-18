@@ -18250,6 +18250,7 @@ diameter 2.54 mm, horizontal, grid 10.16 mm</description>
 <plain>
 <text x="9.652" y="36.068" size="1.778" layer="98">Vref = 7.15V</text>
 <text x="193.04" y="109.22" size="1.778" layer="94" align="center">UNUSED OPAMP</text>
+<text x="57.912" y="127.508" size="1.778" layer="98">change to SO8</text>
 </plain>
 <instances>
 <instance part="U1" gate="U" x="40.64" y="27.94" smashed="yes">

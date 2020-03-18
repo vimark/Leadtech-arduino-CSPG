@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="9.4.2">
+<eagle version="9.1.3">
 <drawing>
 <settings>
 <setting alwaysvectorfont="no"/>
@@ -18191,7 +18191,7 @@ diameter 2.54 mm, horizontal, grid 10.16 mm</description>
 <part name="R6" library="trosh_devices.eagle.v9" deviceset="RESISTOR" device="-V" value="10K"/>
 <part name="R7" library="trosh_devices.eagle.v9" deviceset="RESISTOR" device="-V" value="100K"/>
 <part name="GND4" library="dp_devices.v6" deviceset="SUPPLY_GND" device=""/>
-<part name="R8" library="trosh_devices.eagle.v9" deviceset="TRIMMER" device="-3362P_EXPAD" value="5K"/>
+<part name="R8" library="trosh_devices.eagle.v9" deviceset="TRIMMER" device="-3362P_EXPAD" value="10K"/>
 <part name="R9" library="trosh_devices.eagle.v9" deviceset="RESISTOR" device="-V" value="3.3K"/>
 <part name="R10" library="rcl" library_urn="urn:adsk.eagle:library:334" deviceset="R-EU_" device="0207/12" package3d_urn="urn:adsk.eagle:package:23489/1" value="10K"/>
 <part name="GND5" library="dp_devices.v6" deviceset="SUPPLY_GND" device=""/>
